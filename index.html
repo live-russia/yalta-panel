@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#080e14">
 <meta name="description" content="Администрация сервера Ялта — Live Russia">
 <title>Сервер Ялта · Live Russia</title>
-<script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=qP3bL6saKSzIhxeUMeJ8JVfWyeOcWFA5LyXpAbg5fsBcuLWLLg396VH-Ct7yFuCSoeWTxK6aNX6EBtNiSblh0Q29TdTWoZEHi6vehqOlmmsYk_cm_K1Mx0mwpMpBYO1_MmWKCPV3FW4K6qqTBInd24zgo6JWdtD3nLY603jYZiw2m4kuI3vJxsjrQZXpxL4Q6qH8EcCWU8u1jGabxeWAKw" charset="UTF-8"></script><style>
+<script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=US8L_ENvnZs41Ibf5zsHXNGvrFivmzupIjOMf0U2fV8pAMo_7KWs9Qk2LxgEI56tkarOts3-J7S77i3xSP3QxgqmMFFDfXtM0E72CyyKkNFzamNQDKS1_7C_OttrqTIkE3UE3h_tTDpPeSLEALee4_ULx88Xxkgs9jqqCAaWsUib1j_DMuwMrzvMleD-3D_o3xUiaPsvZPA9iO6MtDI72w" charset="UTF-8"></script><style>
 
 :root{color-scheme:dark;--bg:#080e14;--panel:#101923;--panel2:#0c151e;--line:#233442;--text:#edf3f7;--muted:#91a3b2;--blue:#3b9cff;--green:#48d6a0;--red:#ff6574;--gold:#ffc66d}
 *{box-sizing:border-box}
@@ -112,6 +112,19 @@ let currentAdminTab = 'pending';
    УТИЛИТЫ
    ============================================================ */
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+async function writeAuditLog(action, details=''){
+  if(!sb || !session) return;
+  const {error}=await sb.from('logs').insert([{
+    staff_name:'—',
+    section:'panel',
+    type:String(action||'Действие').slice(0,120),
+    date:todayStr(),
+    reason:String(details||'').slice(0,500),
+    issued_by:session.login
+  }]);
+  if(error) console.warn('Не удалось записать действие в журнал:',error.message);
+}
+
 function todayStr(){const d=new Date();const local=new Date(d.getTime()-d.getTimezoneOffset()*60000);return local.toISOString().slice(0,10)}
 function fmt(d){if(!d)return '—';const p=String(d).slice(0,10).split('-');return p.length===3?`${p[2]}.${p[1]}.${p[0]}`:d}
 function toast(msg){const el=document.getElementById('toastRoot');el.innerHTML=`<div class="toast">${esc(msg)}</div>`;clearTimeout(el._t);el._t=setTimeout(()=>el.innerHTML='',2800)}
@@ -543,7 +556,9 @@ async function renderList(section){
   });
   const editable=canEditList(section);
   const showPromoted=section==='admins';
-  // столбец «Должность» — у admins и leaders; у helpers скрыт
+  const showLevel=section==='admins';
+  // Столбец «Уровень» показывается только в списке администрации.
+  // «Должность» у admins и leaders; у helpers скрыта.
   const showPosition = section !== 'helpers';
   const positionLabel = section === 'leaders' ? 'Фракция' : 'Должность';
   const addLabel = PERSON_LABEL[section];
@@ -553,24 +568,25 @@ async function renderList(section){
     <div class="table-wrap">
       <table class="table">
         <thead><tr>
-          <th>Никнейм</th><th>Уровень</th>
+          <th>Никнейм</th>
+          ${showLevel?'<th>Уровень</th>':''}
           ${showPosition?`<th>${positionLabel}</th>`:''}
           <th>Выговоры</th><th>Устные</th><th>Назначен</th>
           ${showPromoted?'<th>Повышение</th>':''}
           ${editable?'<th>Действия</th>':''}
         </tr></thead>
         <tbody>
-          ${arr.length?arr.map(s=>staffRow(section,s,editable,showPromoted,showPosition)).join(''):'<tr><td colspan="10"><div class="empty">Список пуст</div></td></tr>'}
+          ${arr.length?arr.map(s=>staffRow(section,s,editable,showPromoted,showPosition,showLevel)).join(''):'<tr><td colspan="10"><div class="empty">Список пуст</div></td></tr>'}
         </tbody>
       </table>
     </div>
   `;
 }
 
-function staffRow(section,s,editable,showPromoted,showPosition){
+function staffRow(section,s,editable,showPromoted,showPosition,showLevel){
   return `<tr class="${s.inactive?'inactive-row':''}">
     <td><span class="nick">${esc(s.name)}</span>${s.inactive?'<span class="badge-inactive">НЕАКТИВ</span>':''}</td>
-    <td><span class="level">${s.level} уровень</span></td>
+    ${showLevel?`<td><span class="level">${s.level} уровень</span></td>`:''}
     ${showPosition?`<td>${esc(s.position)}</td>`:''}
     <td><span class="count ${s.warns>=3?'bad':s.warns?'warn':'ok'}">${s.warns}/3</span></td>
     <td><span class="count ${s.oral>=2?'bad':s.oral?'warn':'ok'}">${s.oral}/2</span></td>
@@ -640,6 +656,7 @@ async function saveStaff(section,id){
   if(id)({error}=await sb.from('staff').update(payload).eq('id',id));
   else ({error}=await sb.from('staff').insert([payload]));
   if(error){toast('Ошибка: '+error.message);return}
+  await writeAuditLog(id?'Изменение сотрудника':'Добавление сотрудника',`${SECTION_TITLES[section]}: ${payload.name}`);
   closeModal();renderList(section);toast('Сохранено');
 }
 
@@ -648,6 +665,7 @@ async function deleteStaff(section,id){
   if(!confirm('Удалить '+PERSON_LABEL[section]+'?'))return;
   const {error}=await sb.from('staff').delete().eq('id',id);
   if(error){toast('Ошибка: '+error.message);return}
+  await writeAuditLog('Удаление сотрудника',`${SECTION_TITLES[section]}: ${id}`);
   renderList(section);toast('Удалено');
 }
 
@@ -657,6 +675,7 @@ async function toggleInactive(id){
   if(!canEditList(s.section)){toast('Нет доступа');return}
   const {error}=await sb.from('staff').update({inactive:!s.inactive}).eq('id',id);
   if(error){toast('Ошибка: '+error.message);return}
+  await writeAuditLog(s.inactive?'Возврат сотрудника в актив':'Перевод сотрудника в неактив',`${SECTION_TITLES[s.section]}: ${s.name}`);
   renderList(s.section);
 }
 
@@ -722,6 +741,7 @@ async function issueSanction(section,id,type){
   }
   const {error:el}=await sb.from('logs').insert(logs);
   if(el){toast('Ошибка журнала: '+el.message);return}
+  await writeAuditLog(oral?'Выдача устного выговора':'Выдача выговора',`${s.name}; причина: ${reason}`);
   closeModal();renderList(section);
   toast(willDelete?'Удалён (3/3)':'Взыскание добавлено');
 }
@@ -761,6 +781,7 @@ async function removeSanction(section,id){
   const {error}=await sb.from('staff').update({[field]:s[field]-1}).eq('id',id);
   if(error){toast('Ошибка: '+error.message);return}
   await sb.from('logs').insert([{staff_name:s.name,section,type:type==='oral'?'Снятие устного':'Снятие выговора',date:todayStr(),reason,issued_by:session.login}]);
+  await writeAuditLog(type==='oral'?'Снятие устного взыскания':'Снятие выговора',`${s.name}; причина: ${reason}`);
   closeModal();renderList(section);toast('Снято');
 }
 
@@ -823,6 +844,7 @@ async function saveInfo(section){
   if(section==='main')renderHome();
   else if(section.startsWith('shop_'))renderShop(section.replace(/^shop_/,''));
   else renderInfoSection(section);
+  await writeAuditLog('Публикация информации',`${SECTION_TITLES[section]||section}: ${title}`);
   toast('Опубликовано');
 }
 
@@ -834,6 +856,7 @@ async function deleteInfo(id,section){
   if(section==='main')renderHome();
   else if(section.startsWith('shop_'))renderShop(section.replace(/^shop_/,''));
   else renderInfoSection(section);
+  await writeAuditLog('Удаление информации',`${SECTION_TITLES[section]||section}; запись ID: ${id}`);
 }
 
 /* ============================================================
@@ -870,14 +893,42 @@ function renderAdminPanel(){
       <button class="tab ${currentAdminTab==='pending'?'active':''}" onclick="setAdminTab('pending')">📥 Заявки</button>
       <button class="tab ${currentAdminTab==='accounts'?'active':''}" onclick="setAdminTab('accounts')">👥 Аккаунты</button>
       <button class="tab ${currentAdminTab==='shop'?'active':''}" onclick="setAdminTab('shop')">🛒 Магазины</button>
+      <button class="tab ${currentAdminTab==='logs'?'active':''}" onclick="setAdminTab('logs')">📋 Логи действий</button>
     </div>
     <div id="adminContent"><div class="empty">Загрузка…</div></div>
   `;
   if(currentAdminTab==='pending')renderPending();
   else if(currentAdminTab==='accounts')renderAccounts();
+  else if(currentAdminTab==='logs')renderAuditLogs();
   else renderShopAdmin();
 }
 function setAdminTab(t){currentAdminTab=t;renderAdminPanel()}
+
+async function renderAuditLogs(){
+  const el=document.getElementById('adminContent');
+  if(!el)return;
+  el.innerHTML='<div class="empty">Загрузка журнала…</div>';
+  const {data,error}=await sb.from('logs').select('*').order('date',{ascending:false}).limit(300);
+  if(error){
+    el.innerHTML=`<div class="empty">Не удалось загрузить логи: ${esc(error.message)}</div>`;
+    return;
+  }
+  const rows=data||[];
+  if(!rows.length){el.innerHTML='<div class="empty">Записей пока нет</div>';return}
+  el.innerHTML=`<div class="panel" style="margin-top:0">
+    <div class="account-row"><strong>Последние действия</strong><small>Показаны последние 300 записей</small></div>
+    ${rows.map(r=>`
+      <div class="account-row">
+        <div style="min-width:0">
+          <strong>${esc(r.type||'Действие')}</strong>
+          <small>${esc(r.issued_by||'—')} · ${esc(r.section||'—')} · ${fmt(String(r.date||'').slice(0,10))}</small>
+          ${r.reason?`<small style="white-space:normal">${esc(r.reason)}</small>`:''}
+          ${r.staff_name&&r.staff_name!=='—'?`<small>Сотрудник: ${esc(r.staff_name)}</small>`:''}
+        </div>
+      </div>
+    `).join('')}
+  </div>`;
+}
 
 async function renderPending(){
   const el=document.getElementById('adminContent');
@@ -925,6 +976,7 @@ async function approveAccount(id){
   if(!roles.length){err.textContent='Выберите хотя бы одну роль';return}
   const {error}=await sb.from('accounts').update({status:'active',roles}).eq('id',id);
   if(error){err.textContent='Ошибка: '+error.message;return}
+  await writeAuditLog('Одобрение аккаунта',`Аккаунт ID: ${id}; роли: ${roles.join(', ')}`);
   closeModal();renderPending();toast('Аккаунт одобрен');
 }
 
@@ -932,6 +984,7 @@ async function rejectAccount(id){
   if(!confirm('Отклонить заявку?'))return;
   const {error}=await sb.from('accounts').update({status:'rejected'}).eq('id',id);
   if(error){toast('Ошибка');return}
+  await writeAuditLog('Отклонение заявки',`Аккаунт ID: ${id}`);
   renderPending();toast('Заявка отклонена');
 }
 
@@ -994,6 +1047,7 @@ async function saveAccount(id){
   if(pass)payload.password=pass;
   const {error}=await sb.from('accounts').update(payload).eq('id',id);
   if(error){err.textContent='Ошибка: '+error.message;return}
+  await writeAuditLog('Изменение аккаунта',`Аккаунт ID: ${id}; роли: ${roles.join(', ')}; должность/монеты обновлены${pass?' и пароль изменён':''}`);
   closeModal();renderAccounts();toast('Сохранено');
   if(session&&session.id===id){await reloadSession();renderTopbar()}
 }
@@ -1003,6 +1057,7 @@ async function deleteAccount(id){
   if(!confirm('Удалить аккаунт?'))return;
   const {error}=await sb.from('accounts').delete().eq('id',id);
   if(error){toast('Ошибка: '+error.message);return}
+  await writeAuditLog('Удаление аккаунта',`Аккаунт ID: ${id}`);
   renderAccounts();toast('Удалено');
 }
 
@@ -1051,6 +1106,7 @@ async function saveProductPrice(id){
   const val=Math.max(0,parseInt(document.getElementById('price-'+id).value,10)||0);
   const {error}=await sb.from('shop_products').update({price:val}).eq('id',id);
   if(error){toast('Ошибка');return}
+  await writeAuditLog('Изменение цены товара',`Товар ID: ${id}; новая цена: ${val}`);
   toast('Цена обновлена');
 }
 
@@ -1059,6 +1115,7 @@ async function toggleProductHidden(id){
   if(!p)return;
   const {error}=await sb.from('shop_products').update({hidden:!p.hidden}).eq('id',id);
   if(error){toast('Ошибка: '+error.message);return}
+  await writeAuditLog(p.hidden?'Показ товара':'Скрытие товара',`Товар: ${p.name}`);
   renderShopAdmin();
   toast(p.hidden?'Товар показан':'Товар скрыт');
 }
@@ -1087,6 +1144,7 @@ async function addProduct(section){
   if((count||0)>=5){toast('Лимит 5');return}
   const {error}=await sb.from('shop_products').insert([{section,type:'custom',name,description,price,builtin:false}]);
   if(error){toast('Ошибка: '+error.message);return}
+  await writeAuditLog('Добавление товара',`Раздел: ${SECTION_TITLES[section]||section}; товар: ${name}`);
   closeModal();renderShopAdmin();toast('Добавлено');
 }
 
@@ -1094,6 +1152,7 @@ async function deleteProduct(id,section){
   if(!confirm('Удалить товар?'))return;
   const {error}=await sb.from('shop_products').delete().eq('id',id);
   if(error){toast('Ошибка');return}
+  await writeAuditLog('Удаление товара',`Товар ID: ${id}; раздел: ${SECTION_TITLES[section]||section}`);
   renderShopAdmin();
 }
 
@@ -1127,6 +1186,7 @@ async function saveRoulette(id){
   if(!Array.isArray(prizes)){err.textContent='Призы должны быть массивом';return}
   const {error}=await sb.from('roulettes').update({price,prizes}).eq('id',id);
   if(error){err.textContent='Ошибка: '+error.message;return}
+  await writeAuditLog('Изменение рулетки',`Рулетка ID: ${id}; цена: ${price}; призов: ${prizes.length}`);
   closeModal();renderShopAdmin();toast('Сохранено');
 }
 
