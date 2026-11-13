@@ -1,145 +1,3 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#05090d">
-<title>Yalta Administration — Live Russia</title>
-<style>
-:root{--bg:#070b10;--panel:#0e151d;--panel2:#111c26;--line:#1d2b38;--text:#eef5fa;--muted:#8293a1;--cyan:#00d9e8;--blue:#167bff;--danger:#ff5b67;--yellow:#f3bd55;--green:#45d6a0;--radius:16px}
-*{box-sizing:border-box}
-body{margin:0;background:radial-gradient(ellipse at 75% -10%,#102c3b 0,transparent 40%),var(--bg);color:var(--text);font:14px/1.5 Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;min-height:100vh}
-button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}
-.topbar{height:76px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 clamp(18px,4vw,58px);background:#070b10dd;backdrop-filter:blur(14px);position:sticky;top:0;z-index:5}
-.brand{display:flex;align-items:center;gap:15px;cursor:pointer}
-.logo{font-size:24px;font-weight:900;letter-spacing:1.5px;white-space:nowrap;line-height:1}
-.logo .live{color:var(--cyan)}.logo .russia{color:#fff}
-.brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-top:2px}
-.top-actions{display:flex;align-items:center;gap:10px}
-main{width:min(1200px,calc(100% - 36px));margin:42px auto 0;padding-bottom:96px}
-.hero{margin-bottom:24px}
-.eyebrow{color:var(--cyan);text-transform:uppercase;letter-spacing:2.5px;font-size:10px;font-weight:800}
-.hero h1{font-size:clamp(30px,5vw,46px);line-height:1.06;letter-spacing:-1.8px;margin:9px 0 10px}
-.hero p{color:var(--muted);margin:0;max-width:620px}
-.btn{border:1px solid var(--line);background:#14212c;color:var(--text);border-radius:10px;padding:10px 15px;font-weight:650;transition:.18s}
-.btn:hover{border-color:#2c8090;background:#172d39;transform:translateY(-1px)}
-.btn.primary{background:linear-gradient(110deg,#00bfcf,#147bff);border:0;color:white;box-shadow:0 7px 22px #007caa33}
-.btn.danger{border-color:#65323b;color:#ff8790;background:#29161c}
-.btn.ghost{background:transparent}
-.btn.small{padding:7px 10px;font-size:12px}
-.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:26px 0}
-.stat{background:linear-gradient(145deg,#111c26,#0c131a);border:1px solid var(--line);border-radius:14px;padding:17px 19px}
-.stat label{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px}
-.stat strong{display:block;font-size:32px;margin-top:5px;letter-spacing:-1px}
-.stat span{color:#7f96a6;font-size:11px}
-.panel{margin-top:22px;background:linear-gradient(145deg,#101923,#0c131a);border:1px solid var(--line);border-radius:16px;padding:20px}
-.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
-.panel h2{font-size:17px;margin:0}
-.panel h3{font-size:14px;margin:16px 0 8px;color:#cdd8df}
-.tabs{display:flex;gap:7px;flex-wrap:wrap;margin:18px 0}
-.tab{padding:8px 14px;border-radius:9px;background:transparent;border:1px solid var(--line);color:#91a3af;font-weight:600}
-.tab.active{background:#12313b;color:#69e8ed;border-color:#17606b}
-.section-head h1{font-size:32px;letter-spacing:-1px;margin:0 0 6px}
-.section-head p{color:var(--muted);margin:0}
-.table-wrap{border:1px solid var(--line);border-radius:15px;overflow:auto;background:#0b1219}
-.table{width:100%;border-collapse:collapse;min-width:820px}
-.table th{text-align:left;color:#7e929f;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;padding:15px 16px;background:#0e1821;border-bottom:1px solid var(--line);white-space:nowrap}
-.table td{padding:14px 16px;border-bottom:1px solid #17232d;color:#dce7ed;white-space:nowrap;vertical-align:middle}
-.table tr:last-child td{border-bottom:0}
-.table tbody tr:hover{background:#101d27}
-.nick{font-weight:750;color:#fff}
-.level{display:inline-flex;align-items:center;padding:4px 9px;border-radius:7px;background:#12313b;color:#5ce6ee;font-weight:750;font-size:11px}
-.count{display:inline-flex;align-items:center;justify-content:center;min-width:44px;padding:4px 8px;border-radius:7px;font-weight:750;font-size:11px}
-.count.warn{background:#3a2815;color:#ffc66d}
-.count.bad{background:#3b1c24;color:#ff8089}
-.count.ok{background:#123128;color:#60ddb0}
-.inactive-row{opacity:.55;background:#1a1012}
-.inactive-row .nick{color:#ffb0b5;text-decoration:line-through}
-.badge-inactive{display:inline-block;margin-left:6px;font-size:10px;padding:2px 6px;border-radius:5px;background:#3b1c24;color:#ff8790;font-weight:700;vertical-align:middle}
-.actions{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
-.empty{text-align:center;padding:55px 20px;color:var(--muted)}
-.empty strong{display:block;color:#dce7ed;font-size:16px;margin-bottom:5px}
-.info-msg{padding:14px 0;border-top:1px solid #1a2731}
-.info-msg:first-child{border-top:0}
-.info-msg p{margin:6px 0 8px;color:#c6d3dc;white-space:pre-wrap;word-wrap:break-word}
-.info-msg small{color:var(--muted);font-size:11px}
-.info-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
-.shop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
-.shop-card{background:linear-gradient(145deg,#111c26,#0c131a);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:8px}
-.shop-card strong{font-size:15px}
-.shop-card p{color:var(--muted);font-size:12px;margin:0;flex:1;min-height:34px;word-wrap:break-word}
-.shop-icon{font-size:26px;line-height:1}
-.shop-price{color:var(--yellow);font-weight:800;font-size:18px}
-.shop-price span{font-size:11px;color:var(--muted);font-weight:500}
-.roulette-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
-.profile-card{background:linear-gradient(145deg,#111c26,#0c131a);border:1px solid var(--line);border-radius:16px;padding:26px;display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap}
-.profile-avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--blue));display:grid;place-items:center;font-size:32px;font-weight:900;color:#fff;flex-shrink:0}
-.profile-info{flex:1;min-width:220px;display:flex;flex-direction:column;gap:14px}
-.profile-row label{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px}
-.profile-val{font-size:16px;font-weight:600;color:#fff}
-.role-badge{display:inline-block;padding:3px 10px;border-radius:6px;background:#12313b;color:#5ce6ee;font-size:12px;font-weight:600;margin:2px 2px 2px 0}
-.coins{color:var(--yellow);font-size:22px;font-weight:800}
-.account-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid #1a2731;gap:10px;flex-wrap:wrap}
-.account-row:first-child{border-top:0}
-.account-row strong{display:block}
-.account-row small{color:var(--muted);font-size:12px;display:block;margin-top:2px}
-footer{border-top:1px solid var(--line);padding:22px;text-align:center;color:#637581;font-size:11px;letter-spacing:.4px;margin-top:40px}
-.bottomnav{position:fixed;bottom:0;left:0;right:0;height:66px;background:#070b10f0;backdrop-filter:blur(14px);border-top:1px solid var(--line);display:flex;justify-content:center;gap:6px;z-index:10;padding:0 10px}
-.nav-item{flex:1;max-width:130px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:transparent;border:none;color:var(--muted);font-size:11px;padding:6px;border-radius:9px;transition:.15s;font-weight:600}
-.nav-item:hover{color:#cdd8df;background:#101d27}
-.nav-item.active{color:var(--cyan);background:#12313b}
-.nav-icon{font-size:18px;line-height:1}
-.modal-backdrop{position:fixed;inset:0;background:#020508c9;backdrop-filter:blur(7px);z-index:20;display:grid;place-items:center;padding:18px}
-.modal{width:min(540px,100%);max-height:90vh;overflow:auto;background:#101923;border:1px solid #263946;border-radius:18px;padding:23px;box-shadow:0 24px 80px #0009}
-.modal h3{font-size:20px;margin:0 0 5px}
-.modal .hint{color:var(--muted);font-size:12px;margin:0 0 18px}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.form-row{display:flex;flex-direction:column;gap:6px;margin-bottom:13px}
-.form-row.full{grid-column:1/-1}
-.form-row label{font-size:11px;color:#91a3af;font-weight:600}
-.form-row input,.form-row select,.form-row textarea{width:100%;background:#091119;border:1px solid #263743;color:white;border-radius:9px;padding:11px;outline:none}
-.form-row input:focus,.form-row select:focus,.form-row textarea:focus{border-color:#00aebe;box-shadow:0 0 0 3px #00c8d014}
-.form-row textarea{min-height:80px;resize:vertical}
-.modal-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:18px}
-.error{color:#ff7f89;font-size:12px;min-height:18px;margin:8px 0}
-.admin-name{font-size:12px;color:#9fb0ba;padding:0 6px;font-weight:600}
-.toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%);z-index:40;background:#17332d;border:1px solid #286b58;color:#a4f0d1;padding:11px 17px;border-radius:10px;box-shadow:0 8px 30px #0008;font-size:13px;max-width:90vw}
-.login-logo{font-size:30px;margin:0 auto 18px;display:block;text-align:center}
-.role-cb-row{display:flex;gap:8px;align-items:center;margin:6px 0;padding:8px 10px;background:#0b1219;border:1px solid #1d2b38;border-radius:8px;cursor:pointer}
-.role-cb-row input{width:auto;margin:0}
-@media(max-width:760px){
- .topbar{height:66px;padding:0 15px}
- .logo{font-size:18px}
- .brand small{display:none}
- main{margin-top:24px;width:calc(100% - 26px)}
- .stats{grid-template-columns:1fr;gap:9px}
- .stat strong{font-size:26px}
- .form-grid{grid-template-columns:1fr}
- .form-row.full{grid-column:auto}
- .admin-name{display:none}
- .table{min-width:760px}
- .profile-card{padding:18px}
- .nav-item{font-size:10px}
- .nav-icon{font-size:16px}
-}
-</style>
-</head>
-<body>
-<header class="topbar">
-  <div class="brand" onclick="showView('home')">
-    <div class="logo"><span class="live">LIVE</span> <span class="russia">RUSSIA</span></div>
-    <div><small>CR:MP · YALTA SERVER</small></div>
-  </div>
-  <div class="top-actions" id="authZone"></div>
-</header>
-
-<main id="app"></main>
-
-<nav class="bottomnav" id="bottomnav"></nav>
-<div id="modalRoot"></div>
-<div id="toastRoot"></div>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================================================
@@ -165,11 +23,32 @@ const ROLE_LABELS = {
 const SECTION_LABELS = { admins:'Admins', leaders:'Leaders', helpers:'Helpers' };
 const SECTION_TITLES = { admins:'Администрация', leaders:'Лидеры', helpers:'Агенты поддержки', main:'Главная', profile:'Профиль' };
 
+// Терминология по разделам
+const PERSON_LABEL = {
+  admins:  'администратор',
+  leaders: 'лидер',
+  helpers: 'агент поддержки',
+};
+const PERSON_LABEL_CAP = {
+  admins:  'Администратор',
+  leaders: 'Лидер',
+  helpers: 'Агент поддержки',
+};
+// разделы магазинной информации
+const SHOP_SECTION = {
+  admins:  'shop_admins',
+  leaders: 'shop_leaders',
+  helpers: 'shop_helpers',
+};
+
 let session = null;
 let currentView = 'home';
 let currentTab = { admins:'list', leaders:'list', helpers:'list' };
 let currentAdminTab = 'pending';
 
+/* ============================================================
+   УТИЛИТЫ
+   ============================================================ */
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function todayStr(){return new Date().toISOString().slice(0,10)}
 function fmt(d){if(!d)return '—';const p=String(d).slice(0,10).split('-');return p.length===3?`${p[2]}.${p[1]}.${p[0]}`:d}
@@ -179,6 +58,9 @@ function closeModal(){document.getElementById('modalRoot').innerHTML=''}
 function saveSession(){try{if(session)localStorage.setItem('lr_acc',JSON.stringify(session));else localStorage.removeItem('lr_acc')}catch(e){}}
 function loadSession(){try{const r=localStorage.getItem('lr_acc');return r?JSON.parse(r):null}catch(e){return null}}
 
+/* ============================================================
+   ПРАВА
+   ============================================================ */
 function hasRole(...roles){return !!session && Array.isArray(session.roles) && roles.some(r=>session.roles.includes(r))}
 function isPanelAdmin(){return hasRole('panel_admin')}
 function isSphereHead(){return hasRole('sphere_head')}
@@ -201,22 +83,28 @@ function canEditList(section){
 }
 function canManageInfo(section){
   if(!session)return false;
-  if(section==='main'||section==='admins')return isPanelAdmin();
+  const base = String(section||'').replace(/^shop_/, '');
+  if(base==='main'||base==='admins')return isPanelAdmin();
   return isSphereHead()||isPanelAdmin();
 }
 
+/* ============================================================
+   СЕССИЯ
+   ============================================================ */
 async function reloadSession(){
   if(!session||!sb)return;
   const {data} = await sb.from('accounts').select('*').eq('id',session.id).single();
   if(data){session=data;saveSession()}
 }
-
 function logout(){
   session=null;saveSession();
   renderTopbar();showView('home');
   toast('Вы вышли');
 }
 
+/* ============================================================
+   ВЕРХНЯЯ ПАНЕЛЬ / НИЖНЯЯ НАВИГАЦИЯ
+   ============================================================ */
 function renderTopbar(){
   const el = document.getElementById('authZone');
   if(session){
@@ -232,7 +120,6 @@ function renderTopbar(){
     `;
   }
 }
-
 function renderBottomnav(){
   const items=[
     {key:'home',label:'Главная',icon:'🏠'},
@@ -248,7 +135,6 @@ function renderBottomnav(){
     </button>
   `).join('');
 }
-
 function showView(view){
   currentView = view;
   renderTopbar();renderBottomnav();
@@ -279,7 +165,6 @@ function showLogin(){
   `);
   setTimeout(()=>document.getElementById('loginName')?.focus(),60);
 }
-
 async function doLogin(){
   const errEl = document.getElementById('loginError');
   errEl.textContent='';
@@ -302,7 +187,6 @@ async function doLogin(){
   }catch(e){errEl.textContent='Ошибка: '+(e.message||e)}
   finally{btn.disabled=false;btn.textContent='Войти'}
 }
-
 function openRegisterModal(){
   modal(`
     <h3>Регистрация</h3>
@@ -319,7 +203,6 @@ function openRegisterModal(){
     </form>
   `);
 }
-
 async function doRegister(){
   const errEl=document.getElementById('regError');errEl.textContent='';
   if(!sb){errEl.textContent='Supabase не инициализирован';return}
@@ -384,6 +267,9 @@ async function renderHome(){
   `;
 }
 
+/* ============================================================
+   РАЗДЕЛЫ
+   ============================================================ */
 function renderSection(section){
   const app=document.getElementById('app');
   if(!session){app.innerHTML=`<div class="empty"><strong>Требуется вход</strong>Войдите или зарегистрируйтесь</div>`;return}
@@ -404,17 +290,44 @@ function renderSection(section){
 }
 function setTab(section,tab){currentTab[section]=tab;renderSection(section)}
 
+/* ============================================================
+   МАГАЗИН
+   ============================================================ */
 async function renderShop(section){
   const content=document.getElementById('sectionContent');
   content.innerHTML='<div class="empty">Загрузка…</div>';
-  const [prods,rouls]=await Promise.all([
+  const shopSection = SHOP_SECTION[section];
+  const [prods,rouls,infos]=await Promise.all([
     sb.from('shop_products').select('*').eq('section',section).order('builtin',{ascending:false}),
     sb.from('roulettes').select('*').eq('section',section).order('price'),
+    sb.from('info_messages').select('*').eq('section',shopSection).order('created_at',{ascending:false}),
   ]);
-  const products=prods.data||[], roulettes=rouls.data||[];
+  const products=(prods.data||[]).filter(p => !p.hidden);
+  const roulettes=rouls.data||[];
+  const shopInfo=infos.data||[];
   const coins = session?.coins||0;
+  const canManageShopInfo = canManageInfo(shopSection);
 
   content.innerHTML=`
+    <div class="panel">
+      <div class="panel-head">
+        <div><div class="eyebrow">Information</div><h2>Информация магазина</h2></div>
+        ${canManageShopInfo?`<button class="btn primary small" onclick="openInfoModal('${shopSection}')">＋ Добавить</button>`:''}
+      </div>
+      <div>
+        ${shopInfo.length?shopInfo.map(m=>`
+          <div class="info-msg">
+            <div class="info-head">
+              <strong>${esc(m.title)}</strong>
+              ${canManageShopInfo?`<button class="btn danger small" onclick="deleteInfo('${m.id}','${shopSection}')">×</button>`:''}
+            </div>
+            <p>${esc(m.content)}</p>
+            ${m.attachment?`<a href="${esc(m.attachment)}" target="_blank" class="btn small ghost">📎 Вложение</a>`:''}
+            <div style="margin-top:6px"><small>${esc(m.author||'—')} · ${fmt(String(m.created_at||'').slice(0,10))}</small></div>
+          </div>
+        `).join(''):'<div class="empty" style="padding:26px 20px">Информации магазина пока нет</div>'}
+      </div>
+    </div>
     <div class="panel">
       <div class="panel-head"><h2>Товары</h2><span class="coins" style="font-size:16px">🪙 ${coins}</span></div>
       <div class="shop-grid">
@@ -459,35 +372,25 @@ function rouletteCard(section,r,coins){
   `;
 }
 
+/* Покупка — только СЕБЕ */
 async function buyProduct(section,productId){
   if(!session){toast('Войдите');return}
   const {data:p}=await sb.from('shop_products').select('*').eq('id',productId).single();
   if(!p){toast('Товар не найден');return}
+  if(p.hidden){toast('Товар недоступен');return}
   if(session.coins<p.price){toast('Недостаточно монет');return}
 
   if(p.type==='warn_removal'||p.type==='oral_removal'){
-    const {data:staffList}=await sb.from('staff').select('*').eq('section',section).order('name');
-    if(!staffList||!staffList.length){toast('В разделе нет сотрудников');return}
-    openTargetSelect(section,p,staffList);
+    const {data:selfArr}=await sb.from('staff').select('*')
+      .eq('section',section).eq('name',session.login).limit(1);
+    if(!selfArr||!selfArr.length){
+      toast('Вы не числитесь в разделе '+SECTION_LABELS[section]);
+      return;
+    }
+    await applyProduct(section,p.id,selfArr[0].id);
   } else {
     await completeCustomPurchase(section,p);
   }
-}
-
-function openTargetSelect(section,product,staffList){
-  modal(`
-    <h3>${esc(product.name)}</h3>
-    <p class="hint">Выберите сотрудника · ${product.price} монет</p>
-    <div style="max-height:50vh;overflow:auto">
-      ${staffList.map(s=>`
-        <div class="account-row">
-          <div><strong>${esc(s.name)}</strong><small>${esc(s.position)} · выг.: ${s.warns}/3 · уст.: ${s.oral}/2</small></div>
-          <button class="btn small primary" onclick="applyProduct('${section}','${product.id}','${s.id}')">Выбрать</button>
-        </div>
-      `).join('')}
-    </div>
-    <div class="modal-actions"><button class="btn ghost" onclick="closeModal()">Отмена</button></div>
-  `);
 }
 
 async function applyProduct(section,productId,staffId){
@@ -496,7 +399,7 @@ async function applyProduct(section,productId,staffId){
   if(!p||!s){toast('Ошибка');return}
   if(session.coins<p.price){toast('Недостаточно монет');return}
   const field=p.type==='warn_removal'?'warns':'oral';
-  if((s[field]||0)<=0){toast('Нет активных взысканий этого типа');return}
+  if((s[field]||0)<=0){toast('У вас нет активных взысканий этого типа');return}
   const {error:eu}=await sb.from('staff').update({[field]:s[field]-1}).eq('id',staffId);
   if(eu){toast('Ошибка: '+eu.message);return}
   await sb.from('logs').insert([{
@@ -555,6 +458,9 @@ async function spinRoulette(section,rouletteId){
   renderTopbar();
 }
 
+/* ============================================================
+   СПИСОК
+   ============================================================ */
 async function renderList(section){
   const content=document.getElementById('sectionContent');
   content.innerHTML='<div class="empty">Загрузка…</div>';
@@ -566,29 +472,35 @@ async function renderList(section){
   });
   const editable=canEditList(section);
   const showPromoted=section==='admins';
+  // столбец «Должность» — у admins и leaders; у helpers скрыт
+  const showPosition = section !== 'helpers';
+  const positionLabel = section === 'leaders' ? 'Фракция' : 'Должность';
+  const addLabel = PERSON_LABEL[section];
 
   content.innerHTML=`
-    ${editable?`<div style="margin-bottom:12px"><button class="btn primary" onclick="openStaffModal('${section}')">＋ Добавить</button></div>`:''}
+    ${editable?`<div style="margin-bottom:12px"><button class="btn primary" onclick="openStaffModal('${section}')">＋ Добавить ${addLabel}</button></div>`:''}
     <div class="table-wrap">
       <table class="table">
         <thead><tr>
-          <th>Никнейм</th><th>Уровень</th><th>Должность</th><th>Выговоры</th><th>Устные</th><th>Назначен</th>
+          <th>Никнейм</th><th>Уровень</th>
+          ${showPosition?`<th>${positionLabel}</th>`:''}
+          <th>Выговоры</th><th>Устные</th><th>Назначен</th>
           ${showPromoted?'<th>Повышение</th>':''}
           ${editable?'<th>Действия</th>':''}
         </tr></thead>
         <tbody>
-          ${arr.length?arr.map(s=>staffRow(section,s,editable,showPromoted)).join(''):'<tr><td colspan="9"><div class="empty">Список пуст</div></td></tr>'}
+          ${arr.length?arr.map(s=>staffRow(section,s,editable,showPromoted,showPosition)).join(''):'<tr><td colspan="10"><div class="empty">Список пуст</div></td></tr>'}
         </tbody>
       </table>
     </div>
   `;
 }
 
-function staffRow(section,s,editable,showPromoted){
+function staffRow(section,s,editable,showPromoted,showPosition){
   return `<tr class="${s.inactive?'inactive-row':''}">
     <td><span class="nick">${esc(s.name)}</span>${s.inactive?'<span class="badge-inactive">НЕАКТИВ</span>':''}</td>
     <td><span class="level">${s.level} уровень</span></td>
-    <td>${esc(s.position)}</td>
+    ${showPosition?`<td>${esc(s.position)}</td>`:''}
     <td><span class="count ${s.warns>=3?'bad':s.warns?'warn':'ok'}">${s.warns}/3</span></td>
     <td><span class="count ${s.oral>=2?'bad':s.oral?'warn':'ok'}">${s.oral}/2</span></td>
     <td>${fmt(s.appointed)}</td>
@@ -615,13 +527,16 @@ async function openStaffModal(section,id){
     s={name:'',level:1,position:'',appointed:todayStr(),promoted:null};
   }
   const showPromoted=section==='admins';
+  const showPosition=section!=='helpers';
+  const positionLabel = section === 'leaders' ? 'Фракция' : 'Должность';
+
   modal(`
     <h3>${id?'Изменить':'Добавить'} · ${SECTION_TITLES[section]}</h3>
     <form onsubmit="event.preventDefault();saveStaff('${section}','${id||''}')">
       <div class="form-grid">
         <div class="form-row"><label>Никнейм</label><input id="stName" required value="${esc(s.name)}"></div>
         <div class="form-row"><label>Уровень (1–8)</label><input id="stLevel" type="number" min="1" max="8" required value="${s.level}"></div>
-        <div class="form-row full"><label>Должность</label><input id="stPosition" required value="${esc(s.position)}"></div>
+        ${showPosition?`<div class="form-row full"><label>${positionLabel}</label><input id="stPosition" required value="${esc(s.position)}"></div>`:''}
         <div class="form-row"><label>Дата назначения</label><input id="stAppointed" type="date" required value="${String(s.appointed).slice(0,10)}"></div>
         ${showPromoted?`<div class="form-row"><label>Дата повышения</label><input id="stPromoted" type="date" value="${s.promoted?String(s.promoted).slice(0,10):''}"></div>`:''}
       </div>
@@ -636,13 +551,16 @@ async function openStaffModal(section,id){
 async function saveStaff(section,id){
   if(!canEditList(section))return;
   const showPromoted=section==='admins';
+  const showPosition=section!=='helpers';
   const payload={
     section,
     name:document.getElementById('stName').value.trim(),
     level:Math.min(8,Math.max(1,parseInt(document.getElementById('stLevel').value,10)||1)),
-    position:document.getElementById('stPosition').value.trim(),
     appointed:document.getElementById('stAppointed').value,
   };
+  if(showPosition){
+    payload.position = document.getElementById('stPosition').value.trim();
+  }
   if(showPromoted){
     const pr=document.getElementById('stPromoted')?.value;
     payload.promoted=pr||null;
@@ -656,7 +574,7 @@ async function saveStaff(section,id){
 
 async function deleteStaff(section,id){
   if(!canEditList(section))return;
-  if(!confirm('Удалить сотрудника?'))return;
+  if(!confirm('Удалить '+PERSON_LABEL[section]+'?'))return;
   const {error}=await sb.from('staff').delete().eq('id',id);
   if(error){toast('Ошибка: '+error.message);return}
   renderList(section);toast('Удалено');
@@ -671,6 +589,9 @@ async function toggleInactive(id){
   renderList(s.section);
 }
 
+/* ============================================================
+   ВЗЫСКАНИЯ
+   ============================================================ */
 async function openSanction(section,id,type){
   if(!canEditList(section))return;
   const {data:s}=await sb.from('staff').select('*').eq('id',id).single();
@@ -681,7 +602,7 @@ async function openSanction(section,id,type){
   if(count>=max){toast('Достигнут максимум');return}
   modal(`
     <h3>${oral?'Устный выговор':'Выговор'}</h3>
-    <p class="hint">Сотрудник: <b>${esc(s.name)}</b> · ${count} из ${max}</p>
+    <p class="hint">${PERSON_LABEL_CAP[section]}: <b>${esc(s.name)}</b> · ${count} из ${max}</p>
     ${oral&&count+1>=2?'<p class="hint" style="color:#ffc66d">⚠ При 2/2 устных автоматически начислится +1 обычный выговор.</p>':''}
     <form onsubmit="event.preventDefault();issueSanction('${section}','${id}','${type}')">
       <div class="form-row"><label>Дата</label><input id="sanDate" type="date" required value="${todayStr()}"></div>
@@ -740,7 +661,7 @@ async function openRemoveSanction(section,id){
   if(!s){toast('Не найдено');return}
   modal(`
     <h3>Снять взыскание</h3>
-    <p class="hint">Сотрудник: <b>${esc(s.name)}</b></p>
+    <p class="hint">${PERSON_LABEL_CAP[section]}: <b>${esc(s.name)}</b></p>
     <form onsubmit="event.preventDefault();removeSanction('${section}','${id}')">
       <div class="form-row"><label>Тип</label>
         <select id="rmType">
@@ -772,6 +693,9 @@ async function removeSanction(section,id){
   closeModal();renderList(section);toast('Снято');
 }
 
+/* ============================================================
+   ИНФОРМАЦИЯ (общая и магазинная)
+   ============================================================ */
 async function renderInfoSection(section){
   const content=document.getElementById('sectionContent');
   content.innerHTML='<div class="empty">Загрузка…</div>';
@@ -798,8 +722,11 @@ async function renderInfoSection(section){
 
 function openInfoModal(section){
   if(!canManageInfo(section))return;
+  const title = section.startsWith('shop_')
+    ? `Информация магазина · ${SECTION_TITLES[section.replace(/^shop_/,'')]}`
+    : `Новая информация · ${SECTION_TITLES[section]||section}`;
   modal(`
-    <h3>Новая информация · ${SECTION_TITLES[section]||section}</h3>
+    <h3>${title}</h3>
     <form onsubmit="event.preventDefault();saveInfo('${section}')">
       <div class="form-row"><label>Заголовок</label><input id="infoTitle" required maxlength="120"></div>
       <div class="form-row"><label>Текст</label><textarea id="infoContent" required maxlength="3000"></textarea></div>
@@ -822,6 +749,7 @@ async function saveInfo(section){
   if(error){toast('Ошибка: '+error.message);return}
   closeModal();
   if(section==='main')renderHome();
+  else if(section.startsWith('shop_'))renderShop(section.replace(/^shop_/,''));
   else renderInfoSection(section);
   toast('Опубликовано');
 }
@@ -832,9 +760,13 @@ async function deleteInfo(id,section){
   const {error}=await sb.from('info_messages').delete().eq('id',id);
   if(error){toast('Ошибка: '+error.message);return}
   if(section==='main')renderHome();
+  else if(section.startsWith('shop_'))renderShop(section.replace(/^shop_/,''));
   else renderInfoSection(section);
 }
 
+/* ============================================================
+   ПРОФИЛЬ
+   ============================================================ */
 async function renderProfile(){
   const app=document.getElementById('app');
   if(!session){app.innerHTML=`<div class="empty"><strong>Требуется вход</strong>Войдите в систему</div>`;return}
@@ -854,6 +786,9 @@ async function renderProfile(){
   `;
 }
 
+/* ============================================================
+   АДМИН ПАНЕЛЬ
+   ============================================================ */
 function renderAdminPanel(){
   const app=document.getElementById('app');
   if(!isPanelAdmin()){app.innerHTML=`<div class="empty"><strong>Нет доступа</strong>Только для админов панели</div>`;return}
@@ -1014,10 +949,15 @@ async function renderShopAdmin(){
       <h3>Товары</h3>
       ${products.map(p=>`
         <div class="account-row">
-          <div><strong>${esc(p.name)}</strong><small>${p.builtin?'Стандартный':'Пользовательский'} · ${p.type}</small></div>
+          <div><strong>${esc(p.name)}</strong><small>${p.builtin?'Стандартный':'Пользовательский'} · ${p.type}${p.hidden?' · 🚫 скрыт':''}</small></div>
           <div class="actions">
             <input type="number" min="0" value="${p.price}" id="price-${p.id}" style="width:90px;background:#091119;border:1px solid #263743;color:#fff;border-radius:8px;padding:6px 8px">
             <button class="btn small" onclick="saveProductPrice('${p.id}')">Сохранить</button>
+            ${(p.type==='warn_removal'||p.type==='oral_removal')?`
+              <button class="btn small ${p.hidden?'danger':''}" onclick="toggleProductHidden('${p.id}')">
+                ${p.hidden?'🚫 Скрыт':'👁 Виден'}
+              </button>
+            `:''}
             ${!p.builtin?`<button class="btn danger small" onclick="deleteProduct('${p.id}','${sec}')">×</button>`:''}
           </div>
         </div>
@@ -1040,6 +980,15 @@ async function saveProductPrice(id){
   const {error}=await sb.from('shop_products').update({price:val}).eq('id',id);
   if(error){toast('Ошибка');return}
   toast('Цена обновлена');
+}
+
+async function toggleProductHidden(id){
+  const {data:p}=await sb.from('shop_products').select('*').eq('id',id).single();
+  if(!p)return;
+  const {error}=await sb.from('shop_products').update({hidden:!p.hidden}).eq('id',id);
+  if(error){toast('Ошибка: '+error.message);return}
+  renderShopAdmin();
+  toast(p.hidden?'Товар показан':'Товар скрыт');
 }
 
 function openAddProduct(section){
@@ -1134,14 +1083,10 @@ function showSchemaErrorScreen(missing){
       </code>
       <p style="margin:14px 0 8px"><b>Что делать:</b></p>
       <ol style="padding-left:20px;color:#c6d3dc;line-height:1.9">
-        <li>Открой Supabase → <b>SQL Editor</b> → вставь SQL-скрипт из чата.</li>
-        <li>В конце должно быть: <code style="background:#0b1219;padding:2px 6px;border-radius:5px">notify pgrst, 'reload schema';</code></li>
+        <li>Supabase → <b>SQL Editor</b> → выполни SQL из чата.</li>
+        <li>Убедись, что в конце есть <code style="background:#0b1219;padding:2px 6px;border-radius:5px">notify pgrst, 'reload schema';</code></li>
         <li>Подожди 10 секунд → <button class="btn small primary" onclick="location.reload()">Перезагрузить</button></li>
       </ol>
-      <p style="margin-top:14px;color:#8293a1;font-size:12px">
-        Ошибка «<i>Could not find the table in the schema cache</i>» — это кэш PostgREST
-        в Supabase, а не сайт.
-      </p>
     </div>`;
 }
 
@@ -1156,5 +1101,3 @@ function showSchemaErrorScreen(missing){
   showView('home');
 })();
 </script>
-</body>
-</html>
