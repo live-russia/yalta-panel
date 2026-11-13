@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#05090d">
+<title>Yalta Administration — Live Russia</title>
+<style>
+:root{--bg:#070b10;--panel:#0e151d;--panel2:#111c26;--line:#1d2b38;--text:#eef5fa;--muted:#8293a1;--cyan:#00d9e8;--blue:#167bff;--danger:#ff5b67;--yellow:#f3bd55;--green:#45d6a0;--radius:16px}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 75% -10%,#102c3b 0,transparent 40%),var(--bg);color:var(--text);font:14px/1.5 Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;min-height:100vh}
+button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}
+.topbar{height:76px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 clamp(18px,4vw,58px);background:#070b10dd;backdrop-filter:blur(14px);position:sticky;top:0;z-index:5}
+.brand{display:flex;align-items:center;gap:15px;cursor:pointer}
+.logo{font-size:24px;font-weight:900;letter-spacing:1.5px;white-space:nowrap;line-height:1}
+.logo .live{color:var(--cyan)}.logo .russia{color:#fff}
+.brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.top-actions{display:flex;align-items:center;gap:10px}
+main{width:min(1200px,calc(100% - 36px));margin:42px auto 0;padding-bottom:96px}
+.hero{margin-bottom:24px}
+.eyebrow{color:var(--cyan);text-transform:uppercase;letter-spacing:2.5px;font-size:10px;font-weight:800}
+.hero h1{font-size:clamp(30px,5vw,46px);line-height:1.06;letter-spacing:-1.8px;margin:9px 0 10px}
+.hero p{color:var(--muted);margin:0;max-width:620px}
+.btn{border:1px solid var(--line);background:#14212c;color:var(--text);border-radius:10px;padding:10px 15px;font-weight:650;transition:.18s}
+.btn:hover{border-color:#2c8090;background:#172d39;transform:translateY(-1px)}
+.btn.primary{background:linear-gradient(110deg,#00bfcf,#147bff);border:0;color:white;box-shadow:0 7px 22px #007caa33}
+.btn.danger{border-color:#65323b;color:#ff8790;background:#29161c}
+.btn.ghost{background:transparent}
+.btn.small{padding:7px 10px;font-size:12px}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:26px 0}
+.stat{background:linear-gradient(145deg,#111c26,#0c131a);border:1px solid var(--line);border-radius:14px;padding:17px 19px}
+.stat label{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px}
+.stat strong{display:block;font-size:32px;margin-top:5px;letter-spacing:-1px}
+.stat span{color:#7f96a6;font-size:11px}
+.panel{margin-top:22px;background:linear-gradient(145deg,#101923,#0c131a);border:1px solid var(--line);border-radius:16px;padding:20px}
+.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.panel h2{font-size:17px;margin:0}
+.panel h3{font-size:14px;margin:16px 0 8px;color:#cdd8df}
+.tabs{display:flex;gap:7px;flex-wrap:wrap;margin:18px 0}
+.tab{padding:8px 14px;border-radius:9px;background:transparent;border:1px solid var(--line);color:#91a3af;font-weight:600}
+.tab.active{background:#12313b;color:#69e8ed;border-color:#17606b}
+.section-head h1{font-size:32px;letter-spacing:-1px;margin:0 0 6px}
+.section-head p{color:var(--muted);margin:0}
+.table-wrap{border:1px solid var(--line);border-radius:15px;overflow:auto;background:#0b1219}
+.table{width:100%;border-collapse:collapse;min-width:820px}
+.table th{text-align:left;color:#7e929f;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;padding:15px 16px;background:#0e1821;border-bottom:1px solid var(--line);white-space:nowrap}
+.table td{padding:14px 16px;border-bottom:1px solid #17232d;color:#dce7ed;white-space:nowrap;vertical-align:middle}
+.table tr:last-child td{border-bottom:0}
+.table tbody tr:hover{background:#101d27}
+.nick{font-weight:750;color:#fff}
+.level{display:inline-flex;align-items:center;padding:4px 9px;border-radius:7px;background:#12313b;color:#5ce6ee;font-weight:750;font-size:11px}
+.count{display:inline-flex;align-items:center;justify-content:center;min-width:44px;padding:4px 8px;border-radius:7px;font-weight:750;font-size:11px}
+.count.warn{background:#3a2815;color:#ffc66d}
+.count.bad{background:#3b1c24;color:#ff8089}
+.count.ok{background:#123128;color:#60ddb0}
+.inactive-row{opacity:.55;background:#1a1012}
+.inactive-row .nick{color:#ffb0b5;text-decoration:line-through}
+.badge-inactive{display:inline-block;margin-left:6px;font-size:10px;padding:2px 6px;border-radius:5px;background:#3b1c24;color:#ff8790;font-weight:700;vertical-align:middle}
+.actions{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.empty{text-align:center;padding:55px 20px;color:var(--muted)}
+.empty strong{display:block;color:#dce7ed;font-size:16px;margin-bottom:5px}
+.info-msg{padding:14px 0;border-top:1px solid #1a2731}
+.info-msg:first-child{border-top:0}
+.info-msg p{margin:6px 0 8px;color:#c6d3dc;white-space:pre-wrap;word-wrap:break-word}
+.info-msg small{color:var(--muted);font-size:11px}
+.info-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.shop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.shop-card{background:linear-gradient(145deg,#111c26,#0c131a);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.shop-card strong{font-size:15px}
+.shop-card p{color:var(--muted);font-size:12px;margin:0;flex:1;min-height:34px;word-wrap:break-word}
+.shop-icon{font-size:26px;line-height:1}
+.shop-price{color:var(--yellow);font-weight:800;font-size:18px}
+.shop-price span{font-size:11px;color:var(--muted);font-weight:500}
+.roulette-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.profile-card{background:linear-gradient(145deg,#111c26,#0c131a);border:1px solid var(--line);border-radius:16px;padding:26px;display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap}
+.profile-avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--blue));display:grid;place-items:center;font-size:32px;font-weight:900;color:#fff;flex-shrink:0}
+.profile-info{flex:1;min-width:220px;display:flex;flex-direction:column;gap:14px}
+.profile-row label{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px}
+.profile-val{font-size:16px;font-weight:600;color:#fff}
+.role-badge{display:inline-block;padding:3px 10px;border-radius:6px;background:#12313b;color:#5ce6ee;font-size:12px;font-weight:600;margin:2px 2px 2px 0}
+.coins{color:var(--yellow);font-size:22px;font-weight:800}
+.account-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid #1a2731;gap:10px;flex-wrap:wrap}
+.account-row:first-child{border-top:0}
+.account-row strong{display:block}
+.account-row small{color:var(--muted);font-size:12px;display:block;margin-top:2px}
+footer{border-top:1px solid var(--line);padding:22px;text-align:center;color:#637581;font-size:11px;letter-spacing:.4px;margin-top:40px}
+.bottomnav{position:fixed;bottom:0;left:0;right:0;height:66px;background:#070b10f0;backdrop-filter:blur(14px);border-top:1px solid var(--line);display:flex;justify-content:center;gap:6px;z-index:10;padding:0 10px}
+.nav-item{flex:1;max-width:130px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:transparent;border:none;color:var(--muted);font-size:11px;padding:6px;border-radius:9px;transition:.15s;font-weight:600}
+.nav-item:hover{color:#cdd8df;background:#101d27}
+.nav-item.active{color:var(--cyan);background:#12313b}
+.nav-icon{font-size:18px;line-height:1}
+.modal-backdrop{position:fixed;inset:0;background:#020508c9;backdrop-filter:blur(7px);z-index:20;display:grid;place-items:center;padding:18px}
+.modal{width:min(540px,100%);max-height:90vh;overflow:auto;background:#101923;border:1px solid #263946;border-radius:18px;padding:23px;box-shadow:0 24px 80px #0009}
+.modal h3{font-size:20px;margin:0 0 5px}
+.modal .hint{color:var(--muted);font-size:12px;margin:0 0 18px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-row{display:flex;flex-direction:column;gap:6px;margin-bottom:13px}
+.form-row.full{grid-column:1/-1}
+.form-row label{font-size:11px;color:#91a3af;font-weight:600}
+.form-row input,.form-row select,.form-row textarea{width:100%;background:#091119;border:1px solid #263743;color:white;border-radius:9px;padding:11px;outline:none}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{border-color:#00aebe;box-shadow:0 0 0 3px #00c8d014}
+.form-row textarea{min-height:80px;resize:vertical}
+.modal-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:18px}
+.error{color:#ff7f89;font-size:12px;min-height:18px;margin:8px 0}
+.admin-name{font-size:12px;color:#9fb0ba;padding:0 6px;font-weight:600}
+.toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%);z-index:40;background:#17332d;border:1px solid #286b58;color:#a4f0d1;padding:11px 17px;border-radius:10px;box-shadow:0 8px 30px #0008;font-size:13px;max-width:90vw}
+.login-logo{font-size:30px;margin:0 auto 18px;display:block;text-align:center}
+.role-cb-row{display:flex;gap:8px;align-items:center;margin:6px 0;padding:8px 10px;background:#0b1219;border:1px solid #1d2b38;border-radius:8px;cursor:pointer}
+.role-cb-row input{width:auto;margin:0}
+@media(max-width:760px){
+ .topbar{height:66px;padding:0 15px}
+ .logo{font-size:18px}
+ .brand small{display:none}
+ main{margin-top:24px;width:calc(100% - 26px)}
+ .stats{grid-template-columns:1fr;gap:9px}
+ .stat strong{font-size:26px}
+ .form-grid{grid-template-columns:1fr}
+ .form-row.full{grid-column:auto}
+ .admin-name{display:none}
+ .table{min-width:760px}
+ .profile-card{padding:18px}
+ .nav-item{font-size:10px}
+ .nav-icon{font-size:16px}
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand" onclick="showView('home')">
+    <div class="logo"><span class="live">LIVE</span> <span class="russia">RUSSIA</span></div>
+    <div><small>CR:MP · YALTA SERVER</small></div>
+  </div>
+  <div class="top-actions" id="authZone"></div>
+</header>
+
+<main id="app"></main>
+
+<nav class="bottomnav" id="bottomnav"></nav>
+<div id="modalRoot"></div>
+<div id="toastRoot"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ============================================================
+   НАСТРОЙКА SUPABASE
+   ============================================================ */
+const SUPABASE_URL = 'https://wwhebkquvhdmmbcmvzfc.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_GlBcOtQnK5I2KjPqCIe2-g_8t7iQiFK';
+
+let sb = null;
+try {
+  if (typeof supabase === 'undefined') console.error('Supabase JS не загружен');
+  else sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+} catch (e) { console.error('Ошибка Supabase:', e); }
+
+/* ============================================================
+   РОЛИ И СОСТОЯНИЕ
+   ============================================================ */
+const ROLE_LABELS = {
+  panel_admin:  'Админ панели',
+  sphere_head:  'Руководитель сферы',
+  server_admin: 'Администратор сервера',
+  leader:       'Лидер',
+  helper:       'Агент поддержки',
+};
+
+const SECTION_LABELS = { admins:'Admins', leaders:'Leaders', helpers:'Helpers' };
+const SECTION_TITLES = { admins:'Администрация', leaders:'Лидеры', helpers:'Агенты поддержки', main:'Главная', profile:'Профиль' };
+
+let session = null;
+let currentView = 'home';
+let currentTab = { admins:'list', leaders:'list', helpers:'list' };
+let currentAdminTab = 'pending';
+
+/* ============================================================
+   УТИЛИТЫ
+   ============================================================ */
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function todayStr(){return new Date().toISOString().slice(0,10)}
+function fmt(d){if(!d)return '—';const p=String(d).slice(0,10).split('-');return p.length===3?`${p[2]}.${p[1]}.${p[0]}`:d}
+function toast(msg){const el=document.getElementById('toastRoot');el.innerHTML=`<div class="toast">${esc(msg)}</div>`;clearTimeout(el._t);el._t=setTimeout(()=>el.innerHTML='',2800)}
+function modal(html){document.getElementById('modalRoot').innerHTML=`<div class="modal-backdrop" onclick="if(event.target===this)closeModal()"><div class="modal">${html}</div></div>`}
+function closeModal(){document.getElementById('modalRoot').innerHTML=''}
+function saveSession(){try{if(session)localStorage.setItem('lr_acc',JSON.stringify(session));else localStorage.removeItem('lr_acc')}catch(e){}}
+function loadSession(){try{const r=localStorage.getItem('lr_acc');return r?JSON.parse(r):null}catch(e){return null}}
+
+/* ============================================================
+   ПРАВА
+   ============================================================ */
+function hasRole(...roles){return !!session && Array.isArray(session.roles) && roles.some(r=>session.roles.includes(r))}
+function isPanelAdmin(){return hasRole('panel_admin')}
+function isSphereHead(){return hasRole('sphere_head')}
+function isServerAdmin(){return hasRole('server_admin')}
+function isLeader(){return hasRole('leader')}
+function isHelper(){return hasRole('helper')}
+
+function canViewSection(section){
+  if(!session)return false;
+  if(isPanelAdmin()||isSphereHead()||isServerAdmin())return true;
+  if(section==='admins')return false;
+  if(section==='leaders')return isLeader();
+  if(section==='helpers')return isHelper();
+  return false;
+}
+function canEditList(section){
+  if(!session)return false;
+  if(section==='admins')return isPanelAdmin();
+  return isSphereHead()||isPanelAdmin();
+}
+function canManageInfo(section){
+  if(!session)return false;
+  if(section==='main'||section==='admins')return isPanelAdmin();
+  return isSphereHead()||isPanelAdmin();
+}
+
+/* ============================================================
+   СЕССИЯ
+   ============================================================ */
+async function reloadSession(){
+  if(!session||!sb)return;
+  const {data} = await sb.from('accounts').select('*').eq('id',session.id).single();
+  if(data){session=data;saveSession()}
+}
+
+function logout(){
+  session=null;saveSession();
+  renderTopbar();showView('home');
+  toast('Вы вышли');
+}
+
+/* ============================================================
+   РЕНДЕР ВЕРХНЕЙ ПАНЕЛИ И НИЖНЕЙ НАВИГАЦИИ
+   ============================================================ */
+function renderTopbar(){
+  const el = document.getElementById('authZone');
+  if(session){
+    el.innerHTML = `
+      <span class="admin-name">${esc(session.login)}</span>
+      ${isPanelAdmin()?`<button class="btn small" onclick="showView('admin_panel')">⚙ Админ панель</button>`:''}
+      <button class="btn ghost small" onclick="logout()">Выйти</button>
+    `;
+  } else {
+    el.innerHTML = `
+      <button class="btn small" onclick="showLogin()">Вход</button>
+      <button class="btn primary small" onclick="openRegisterModal()">Регистрация</button>
+    `;
+  }
+}
+
+function renderBottomnav(){
+  const items=[
+    {key:'home',label:'Главная',icon:'🏠'},
+    {key:'admins',label:'Admins',icon:'🛡'},
+    {key:'leaders',label:'Leaders',icon:'⭐'},
+    {key:'helpers',label:'Helpers',icon:'💬'},
+    {key:'profile',label:'Профиль',icon:'👤'},
+  ];
+  document.getElementById('bottomnav').innerHTML = items.map(i=>`
+    <button class="nav-item ${currentView===i.key?'active':''}" onclick="showView('${i.key}')">
+      <span class="nav-icon">${i.icon}</span>
+      <span>${i.label}</span>
+    </button>
+  `).join('');
+}
+
+function showView(view){
+  currentView = view;
+  renderTopbar();renderBottomnav();
+  window.scrollTo(0,0);
+  const app = document.getElementById('app');
+  app.innerHTML = '<div class="empty">Загрузка…</div>';
+  if(view==='home')renderHome();
+  else if(view==='profile')renderProfile();
+  else if(view==='admin_panel')renderAdminPanel();
+  else renderSection(view);
+}
+
+/* ============================================================
+   АВТОРИЗАЦИЯ
+   ============================================================ */
+function showLogin(){
+  modal(`
+    <div class="login-logo"><span class="live">LIVE</span> <span class="russia">RUSSIA</span></div>
+    <h3 style="text-align:center">Вход</h3>
+    <p class="hint" style="text-align:center">Для доступа к панели</p>
+    <form onsubmit="event.preventDefault();doLogin()">
+      <div class="form-row"><label>Никнейм</label><input id="loginName" autocomplete="username" required></div>
+      <div class="form-row"><label>Пароль</label><input id="loginPass" type="password" autocomplete="current-password" required></div>
+      <div id="loginError" class="error"></div>
+      <button type="submit" class="btn primary" id="loginBtn" style="width:100%">Войти</button>
+    </form>
+    <div class="modal-actions"><button class="btn ghost" onclick="closeModal()">Отмена</button></div>
+  `);
+  setTimeout(()=>document.getElementById('loginName')?.focus(),60);
+}
+
+async function doLogin(){
+  const errEl = document.getElementById('loginError');
+  errEl.textContent='';
+  if(!sb){errEl.textContent='Supabase не инициализирован';return}
+  const login=(document.getElementById('loginName').value||'').trim();
+  const password=document.getElementById('loginPass').value||'';
+  if(!login||!password){errEl.textContent='Заполните все поля';return}
+  const btn=document.getElementById('loginBtn');
+  btn.disabled=true;btn.textContent='Проверка…';
+  try{
+    const {data,error}=await sb.from('accounts').select('*').eq('login',login).eq('password',password).limit(1);
+    if(error){errEl.textContent='Ошибка: '+error.message;return}
+    if(!data||!data.length){errEl.textContent='Неверный логин или пароль';return}
+    const acc=data[0];
+    if(acc.status==='pending'){errEl.textContent='Заявка ещё на рассмотрении';return}
+    if(acc.status==='rejected'){errEl.textContent='Заявка отклонена';return}
+    session=acc;saveSession();
+    closeModal();renderTopbar();showView('home');
+    toast('Добро пожаловать, '+acc.login);
+  }catch(e){errEl.textContent='Ошибка: '+(e.message||e)}
+  finally{btn.disabled=false;btn.textContent='Войти'}
+}
+
+function openRegisterModal(){
+  modal(`
+    <h3>Регистрация</h3>
+    <p class="hint">Заявка будет отправлена админам панели</p>
+    <form onsubmit="event.preventDefault();doRegister()">
+      <div class="form-row"><label>Никнейм</label><input id="regLogin" required minlength="3" maxlength="24" pattern="[A-Za-z0-9_.-]+" placeholder="Nickname"></div>
+      <div class="form-row"><label>Должность</label><input id="regPosition" required maxlength="60" placeholder="Например: Младший администратор"></div>
+      <div class="form-row"><label>Пароль</label><input id="regPassword" type="password" required minlength="6" placeholder="Не менее 6 символов"></div>
+      <div id="regError" class="error"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" onclick="closeModal()">Отмена</button>
+        <button class="btn primary">Отправить</button>
+      </div>
+    </form>
+  `);
+}
+
+async function doRegister(){
+  const errEl=document.getElementById('regError');errEl.textContent='';
+  if(!sb){errEl.textContent='Supabase не инициализирован';return}
+  const login=(document.getElementById('regLogin').value||'').trim();
+  const position=(document.getElementById('regPosition').value||'').trim();
+  const password=document.getElementById('regPassword').value||'';
+  if(!login||!position||!password){errEl.textContent='Заполните все поля';return}
+  if(password.length<6){errEl.textContent='Пароль слишком короткий';return}
+  const {data:ex}=await sb.from('accounts').select('id').eq('login',login).limit(1);
+  if(ex&&ex.length){errEl.textContent='Такой никнейм уже занят';return}
+  const {error}=await sb.from('accounts').insert([{login,position,password,status:'pending',roles:[]}]);
+  if(error){errEl.textContent='Ошибка: '+error.message;return}
+  closeModal();
+  toast('Заявка отправлена');
+}
+
+/* ============================================================
+   ГЛАВНАЯ
+   ============================================================ */
+async function renderHome(){
+  const app=document.getElementById('app');
+  const [a,l,h,info]=await Promise.all([
+    sb.from('staff').select('*',{count:'exact',head:true}).eq('section','admins').eq('inactive',false),
+    sb.from('staff').select('*',{count:'exact',head:true}).eq('section','leaders').eq('inactive',false),
+    sb.from('staff').select('*',{count:'exact',head:true}).eq('section','helpers').eq('inactive',false),
+    sb.from('info_messages').select('*').eq('section','main').order('created_at',{ascending:false}),
+  ]);
+  const adminCount=a.count||0, leaderCount=l.count||0, helperCount=h.count||0;
+  const infoList=info.data||[];
+  const canManage = session && isPanelAdmin();
+
+  app.innerHTML = `
+    <section class="hero">
+      <div class="eyebrow">Yalta · Live Russia</div>
+      <h1>Сервер Ялта</h1>
+      <p>Актуальная статистика и информация о сервере</p>
+    </section>
+    <section class="stats">
+      <div class="stat"><label>Агенты поддержки</label><strong>${helperCount}</strong><span>человек на сервере</span></div>
+      <div class="stat"><label>Лидеры</label><strong>${leaderCount}</strong><span>человек на сервере</span></div>
+      <div class="stat"><label>Администрация</label><strong>${adminCount}</strong><span>человек в составе</span></div>
+    </section>
+    <section class="panel">
+      <div class="panel-head">
+        <div><div class="eyebrow">Information</div><h2>Информация</h2></div>
+        ${canManage?`<button class="btn primary small" onclick="openInfoModal('main')">＋ Добавить</button>`:''}
+      </div>
+      <div>
+        ${infoList.length?infoList.map(m=>`
+          <div class="info-msg">
+            <div class="info-head">
+              <strong>${esc(m.title)}</strong>
+              ${canManage?`<button class="btn danger small" onclick="deleteInfo('${m.id}','main')">×</button>`:''}
+            </div>
+            <p>${esc(m.content)}</p>
+            ${m.attachment?`<a href="${esc(m.attachment)}" target="_blank" class="btn small ghost">📎 Вложение</a>`:''}
+            <div style="margin-top:6px"><small>${esc(m.author||'—')} · ${fmt(String(m.created_at||'').slice(0,10))}</small></div>
+          </div>
+        `).join(''):'<div class="empty">Информации пока нет</div>'}
+      </div>
+    </section>
+  `;
+}
+
+/* ============================================================
+   РАЗДЕЛЫ (admins / leaders / helpers)
+   ============================================================ */
+function renderSection(section){
+  const app=document.getElementById('app');
+  if(!session){app.innerHTML=`<div class="empty"><strong>Требуется вход</strong>Войдите или зарегистрируйтесь</div>`;return}
+  if(!canViewSection(section)){app.innerHTML=`<div class="empty"><strong>Нет доступа</strong>У вас нет прав для просмотра этого раздела</div>`;return}
+  const tab=currentTab[section];
+  app.innerHTML=`
+    <div class="section-head"><h1>${SECTION_TITLES[section]}</h1><p>Раздел ${SECTION_LABELS[section]}</p></div>
+    <div class="tabs">
+      <button class="tab ${tab==='shop'?'active':''}" onclick="setTab('${section}','shop')">🛒 Магазин</button>
+      <button class="tab ${tab==='list'?'active':''}" onclick="setTab('${section}','list')">📋 Список</button>
+      <button class="tab ${tab==='info'?'active':''}" onclick="setTab('${section}','info')">ℹ Информация</button>
+    </div>
+    <div id="sectionContent"></div>
+  `;
+  if(tab==='shop')renderShop(section);
+  else if(tab==='list')renderList(section);
+  else renderInfoSection(section);
+}
+function setTab(section,tab){currentTab[section]=tab;renderSection(section)}
+
+/* ============================================================
+   МАГАЗИН
+   ============================================================ */
+async function renderShop(section){
+  const content=document.getElementById('sectionContent');
+  content.innerHTML='<div class="empty">Загрузка…</div>';
+  const [prods,rouls]=await Promise.all([
+    sb.from('shop_products').select('*').eq('section',section).order('builtin',{ascending:false}),
+    sb.from('roulettes').select('*').eq('section',section).order('price'),
+  ]);
+  const products=prods.data||[], roulettes=rouls.data||[];
+  const coins = session?.coins||0;
+
+  content.innerHTML=`
+    <div class="panel">
+      <div class="panel-head"><h2>Товары</h2><span class="coins" style="font-size:16px">🪙 ${coins}</span></div>
+      <div class="shop-grid">
+        ${products.length?products.map(p=>productCard(section,p,coins)).join(''):'<div class="empty">Товаров нет</div>'}
+      </div>
+    </div>
+    <div class="panel">
+      <h2>🎰 Рулетки</h2>
+      <div class="roulette-grid" style="margin-top:14px">
+        ${roulettes.length?roulettes.map(r=>rouletteCard(section,r,coins)).join(''):'<div class="empty">Рулеток нет</div>'}
+      </div>
+    </div>
+  `;
+}
+
+function productCard(section,p,coins){
+  const can=coins>=p.price;
+  const icon = p.type==='warn_removal'?'⚠️':p.type==='oral_removal'?'💬':'🎁';
+  return `
+    <div class="shop-card">
+      <div class="shop-icon">${icon}</div>
+      <strong>${esc(p.name)}</strong>
+      <p>${esc(p.description||'—')}</p>
+      <div class="shop-price">${p.price} <span>монет</span></div>
+      <button class="btn primary" ${can?'':'disabled'} onclick="buyProduct('${section}','${p.id}')">Купить</button>
+    </div>
+  `;
+}
+
+function rouletteCard(section,r,coins){
+  const can=coins>=r.price;
+  const prizes=Array.isArray(r.prizes)?r.prizes:[];
+  const preview=prizes.length?prizes.slice(0,3).map(p=>esc(p.name)).join(' · '):'Призы не настроены';
+  return `
+    <div class="shop-card">
+      <div class="shop-icon">🎰</div>
+      <strong>${esc(r.name)}</strong>
+      <p>${preview}${prizes.length>3?' …':''}</p>
+      <div class="shop-price">${r.price} <span>монет</span></div>
+      <button class="btn primary" ${can?'':'disabled'} onclick="spinRoulette('${section}','${r.id}')">Крутить</button>
+    </div>
+  `;
+}
+
+async function buyProduct(section,productId){
+  if(!session){toast('Войдите');return}
+  const {data:p}=await sb.from('shop_products').select('*').eq('id',productId).single();
+  if(!p){toast('Товар не найден');return}
+  if(session.coins<p.price){toast('Недостаточно монет');return}
+
+  if(p.type==='warn_removal'||p.type==='oral_removal'){
+    const {data:staffList}=await sb.from('staff').select('*').eq('section',section).order('name');
+    if(!staffList||!staffList.length){toast('В разделе нет сотрудников');return}
+    openTargetSelect(section,p,staffList);
+  } else {
+    await completeCustomPurchase(section,p);
+  }
+}
+
+function openTargetSelect(section,product,staffList){
+  modal(`
+    <h3>${esc(product.name)}</h3>
+    <p class="hint">Выберите сотрудника · ${product.price} монет</p>
+    <div style="max-height:50vh;overflow:auto">
+      ${staffList.map(s=>`
+        <div class="account-row">
+          <div><strong>${esc(s.name)}</strong><small>${esc(s.position)} · выг.: ${s.warns}/3 · уст.: ${s.oral}/2</small></div>
+          <button class="btn small primary" onclick="applyProduct('${section}','${product.id}','${s.id}')">Выбрать</button>
+        </div>
+      `).join('')}
+    </div>
+    <div class="modal-actions"><button class="btn ghost" onclick="closeModal()">Отмена</button></div>
+  `);
+}
+
+async function applyProduct(section,productId,staffId){
+  const {data:p}=await sb.from('shop_products').select('*').eq('id',productId).single();
+  const {data:s}=await sb.from('staff').select('*').eq('id',staffId).single();
+  if(!p||!s){toast('Ошибка');return}
+  if(session.coins<p.price){toast('Недостаточно монет');return}
+  const field=p.type==='warn_removal'?'warns':'oral';
+  if((s[field]||0)<=0){toast('Нет активных взысканий этого типа');return}
+  const {error:eu}=await sb.from('staff').update({[field]:s[field]-1}).eq('id',staffId);
+  if(eu){toast('Ошибка: '+eu.message);return}
+  await sb.from('logs').insert([{
+    staff_name:s.name,section,
+    type:p.type==='warn_removal'?'Снятие выговора (магазин)':'Снятие устного (магазин)',
+    date:todayStr(),reason:'Покупка в магазине',issued_by:session.login,
+  }]);
+  const newCoins=session.coins-p.price;
+  const {error:ec}=await sb.from('accounts').update({coins:newCoins}).eq('id',session.id);
+  if(ec){toast('Ошибка: '+ec.message);return}
+  session.coins=newCoins;saveSession();
+  await sb.from('purchases').insert([{account_id:session.id,section,product_id:p.id,product_name:p.name,price:p.price}]);
+  closeModal();renderTopbar();
+  toast('Покупка успешна');
+  renderShop(section);
+}
+
+async function completeCustomPurchase(section,p){
+  const newCoins=session.coins-p.price;
+  const {error}=await sb.from('accounts').update({coins:newCoins}).eq('id',session.id);
+  if(error){toast('Ошибка: '+error.message);return}
+  session.coins=newCoins;saveSession();
+  await sb.from('purchases').insert([{account_id:session.id,section,product_id:p.id,product_name:p.name,price:p.price}]);
+  renderTopbar();
+  toast('Покупка успешна');
+  renderShop(section);
+}
+
+async function spinRoulette(section,rouletteId){
+  if(!session){toast('Войдите');return}
+  const {data:r}=await sb.from('roulettes').select('*').eq('id',rouletteId).single();
+  if(!r){toast('Рулетка не найдена');return}
+  if(session.coins<r.price){toast('Недостаточно монет');return}
+  const prizes=Array.isArray(r.prizes)?r.prizes:[];
+  if(!prizes.length){toast('Призы не настроены');return}
+
+  const totalWeight=prizes.reduce((s,x)=>s+(x.weight||1),0);
+  let roll=Math.random()*totalWeight, picked=prizes[prizes.length-1];
+  for(const pz of prizes){roll-=(pz.weight||1);if(roll<=0){picked=pz;break}}
+
+  let coinsAdd = picked.type==='coins' ? (picked.value||0) : 0;
+  const finalCoins = session.coins - r.price + coinsAdd;
+  const {error}=await sb.from('accounts').update({coins:finalCoins}).eq('id',session.id);
+  if(error){toast('Ошибка: '+error.message);return}
+  session.coins=finalCoins;saveSession();
+
+  modal(`
+    <h3>Результат</h3>
+    <div style="text-align:center;padding:24px 0">
+      <div style="font-size:52px">🎉</div>
+      <div style="font-size:20px;font-weight:800;margin-top:10px">${esc(picked.name||'Пусто')}</div>
+      ${coinsAdd?`<div style="color:var(--green);margin-top:8px;font-size:16px">+${coinsAdd} монет</div>`:''}
+    </div>
+    <div class="modal-actions"><button class="btn primary" onclick="closeModal();renderShop('${section}')">OK</button></div>
+  `);
+  renderTopbar();
+}
+
+/* ============================================================
+   СПИСОК СОТРУДНИКОВ
+   ============================================================ */
+async function renderList(section){
+  const content=document.getElementById('sectionContent');
+  content.innerHTML='<div class="empty">Загрузка…</div>';
+  const {data}=await sb.from('staff').select('*').eq('section',section);
+  const arr=(data||[]).slice();
+  arr.sort((a,b)=>{
+    if(a.inactive!==b.inactive)return a.inactive?1:-1;
+    return b.level-a.level;
+  });
+  const editable=canEditList(section);
+  const showPromoted=section==='admins';
+
+  content.innerHTML=`
+    ${editable?`<div style="margin-bottom:12px"><button class="btn primary" onclick="openStaffModal('${section}')">＋ Добавить</button></div>`:''}
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr>
+          <th>Никнейм</th><th>Уровень</th><th>Должность</th><th>Выговоры</th><th>Устные</th><th>Назначен</th>
+          ${showPromoted?'<th>Повышение</th>':''}
+          ${editable?'<th>Действия</th>':''}
+        </tr></thead>
+        <tbody>
+          ${arr.length?arr.map(s=>staffRow(section,s,editable,showPromoted)).join(''):'<tr><td colspan="9"><div class="empty">Список пуст</div></td></tr>'}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function staffRow(section,s,editable,showPromoted){
+  return `<tr class="${s.inactive?'inactive-row':''}">
+    <td><span class="nick">${esc(s.name)}</span>${s.inactive?'<span class="badge-inactive">НЕАКТИВ</span>':''}</td>
+    <td><span class="level">${s.level} уровень</span></td>
+    <td>${esc(s.position)}</td>
+    <td><span class="count ${s.warns>=3?'bad':s.warns?'warn':'ok'}">${s.warns}/3</span></td>
+    <td><span class="count ${s.oral>=2?'bad':s.oral?'warn':'ok'}">${s.oral}/2</span></td>
+    <td>${fmt(s.appointed)}</td>
+    ${showPromoted?`<td>${fmt(s.promoted)}</td>`:''}
+    ${editable?`<td><div class="actions">
+      <button class="btn small" onclick="openSanction('${section}','${s.id}','warn')">Выговор</button>
+      <button class="btn small" onclick="openSanction('${section}','${s.id}','oral')">Устный</button>
+      <button class="btn small" onclick="openRemoveSanction('${section}','${s.id}')">Снять</button>
+      <button class="btn small" onclick="toggleInactive('${s.id}')">${s.inactive?'Актив':'Неактив'}</button>
+      <button class="btn small" onclick="openStaffModal('${section}','${s.id}')">✎</button>
+      <button class="btn danger small" onclick="deleteStaff('${section}','${s.id}')">×</button>
+    </div></td>`:''}
+  </tr>`;
+}
+
+async function openStaffModal(section,id){
+  if(!canEditList(section))return;
+  let s;
+  if(id){
+    const {data}=await sb.from('staff').select('*').eq('id',id).single();
+    if(!data){toast('Не найдено');return}
+    s=data;
+  } else {
+    s={name:'',level:1,position:'',appointed:todayStr(),promoted:null};
+  }
+  const showPromoted=section==='admins';
+  modal(`
+    <h3>${id?'Изменить':'Добавить'} · ${SECTION_TITLES[section]}</h3>
+    <form onsubmit="event.preventDefault();saveStaff('${section}','${id||''}')">
+      <div class="form-grid">
+        <div class="form-row"><label>Никнейм</label><input id="stName" required value="${esc(s.name)}"></div>
+        <div class="form-row"><label>Уровень (1–8)</label><input id="stLevel" type="number" min="1" max="8" required value="${s.level}"></div>
+        <div class="form-row full"><label>Должность</label><input id="stPosition" required value="${esc(s.position)}"></div>
+        <div class="form-row"><label>Дата назначения</label><input id="stAppointed" type="date" required value="${String(s.appointed).slice(0,10)}"></div>
+        ${showPromoted?`<div class="form-row"><label>Дата повышения</label><input id="stPromoted" type="date" value="${s.promoted?String(s.promoted).slice(0,10):''}"></div>`:''}
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" onclick="closeModal()">Отмена</button>
+        <button class="btn primary">Сохранить</button>
+      </div>
+    </form>
+  `);
+}
+
+async function saveStaff(section,id){
+  if(!canEditList(section))return;
+  const showPromoted=section==='admins';
+  const payload={
+    section,
+    name:document.getElementById('stName').value.trim(),
+    level:Math.min(8,Math.max(1,parseInt(document.getElementById('stLevel').value,10)||1)),
+    position:document.getElementById('stPosition').value.trim(),
+    appointed:document.getElementById('stAppointed').value,
+  };
+  if(showPromoted){
+    const pr=document.getElementById('stPromoted')?.value;
+    payload.promoted=pr||null;
+  }
+  let error;
+  if(id)({error}=await sb.from('staff').update(payload).eq('id',id));
+  else ({error}=await sb.from('staff').insert([payload]));
+  if(error){toast('Ошибка: '+error.message);return}
+  closeModal();renderList(section);toast('Сохранено');
+}
+
+async function deleteStaff(section,id){
+  if(!canEditList(section))return;
+  if(!confirm('Удалить сотрудника?'))return;
+  const {error}=await sb.from('staff').delete().eq('id',id);
+  if(error){toast('Ошибка: '+error.message);return}
+  renderList(section);toast('Удалено');
+}
+
+async function toggleInactive(id){
+  const {data:s}=await sb.from('staff').select('*').eq('id',id).single();
+  if(!s)return;
+  if(!canEditList(s.section)){toast('Нет доступа');return}
+  const {error}=await sb.from('staff').update({inactive:!s.inactive}).eq('id',id);
+  if(error){toast('Ошибка: '+error.message);return}
+  renderList(s.section);
+}
+
+/* ============================================================
+   ВЗЫСКАНИЯ
+   ============================================================ */
+async function openSanction(section,id,type){
+  if(!canEditList(section))return;
+  const {data:s}=await sb.from('staff').select('*').eq('id',id).single();
+  if(!s){toast('Не найдено');return}
+  const oral=type==='oral';
+  const count=oral?s.oral:s.warns;
+  const max=oral?2:3;
+  if(count>=max){toast('Достигнут максимум');return}
+  modal(`
+    <h3>${oral?'Устный выговор':'Выговор'}</h3>
+    <p class="hint">Сотрудник: <b>${esc(s.name)}</b> · ${count} из ${max}</p>
+    ${oral&&count+1>=2?'<p class="hint" style="color:#ffc66d">⚠ При 2/2 устных автоматически начислится +1 обычный выговор.</p>':''}
+    <form onsubmit="event.preventDefault();issueSanction('${section}','${id}','${type}')">
+      <div class="form-row"><label>Дата</label><input id="sanDate" type="date" required value="${todayStr()}"></div>
+      <div class="form-row"><label>Причина</label><textarea id="sanReason" required maxlength="500"></textarea></div>
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" onclick="closeModal()">Отмена</button>
+        <button class="btn primary">Выдать</button>
+      </div>
+    </form>
+  `);
+}
+
+async function issueSanction(section,id,type){
+  if(!canEditList(section))return;
+  const oral=type==='oral';
+  const reason=(document.getElementById('sanReason').value||'').trim();
+  const date=document.getElementById('sanDate').value||todayStr();
+  if(!reason){toast('Укажите причину');return}
+  const {data:s,error:e1}=await sb.from('staff').select('*').eq('id',id).single();
+  if(e1||!s){toast('Ошибка чтения');return}
+
+  let newOral=s.oral,newWarns=s.warns,autoWarn=false;
+  if(oral){
+    if(s.oral>=2){toast('Максимум устных');return}
+    newOral=s.oral+1;
+    if(newOral>=2){newWarns=s.warns+1;autoWarn=true}
+  } else {
+    if(s.warns>=3){toast('Максимум выговоров');return}
+    newWarns=s.warns+1;
+  }
+
+  const logs=[{staff_name:s.name,section,type:oral?'Устный выговор':'Выговор',date,reason,issued_by:session.login}];
+  if(autoWarn)logs.push({staff_name:s.name,section,type:'Автоматический выговор',date,reason:'Автоначисление при 2/2 устных',issued_by:'system'});
+
+  const willDelete=newWarns>=3;
+  if(willDelete){
+    logs.push({staff_name:s.name,section,type:'Удаление из состава',date,reason:'Автоудаление при 3/3 выговорах',issued_by:'system'});
+    const {error:ed}=await sb.from('staff').delete().eq('id',id);
+    if(ed){toast('Ошибка: '+ed.message);return}
+  } else {
+    const {error:eu}=await sb.from('staff').update({warns:newWarns,oral:newOral}).eq('id',id);
+    if(eu){toast('Ошибка: '+eu.message);return}
+  }
+  const {error:el}=await sb.from('logs').insert(logs);
+  if(el){toast('Ошибка журнала: '+el.message);return}
+  closeModal();renderList(section);
+  toast(willDelete?'Удалён (3/3)':'Взыскание добавлено');
+}
+
+async function openRemoveSanction(section,id){
+  if(!canEditList(section))return;
+  const {data:s}=await sb.from('staff').select('*').eq('id',id).single();
+  if(!s){toast('Не найдено');return}
+  modal(`
+    <h3>Снять взыскание</h3>
+    <p class="hint">Сотрудник: <b>${esc(s.name)}</b></p>
+    <form onsubmit="event.preventDefault();removeSanction('${section}','${id}')">
+      <div class="form-row"><label>Тип</label>
+        <select id="rmType">
+          <option value="warn" ${s.warns<=0?'disabled':''}>Выговор (${s.warns}/3)</option>
+          <option value="oral" ${s.oral<=0?'disabled':''}>Устный (${s.oral}/2)</option>
+        </select>
+      </div>
+      <div class="form-row"><label>Причина</label><textarea id="rmReason" required maxlength="500"></textarea></div>
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" onclick="closeModal()">Отмена</button>
+        <button class="btn primary">Снять</button>
+      </div>
+    </form>
+  `);
+}
+
+async function removeSanction(section,id){
+  if(!canEditList(section))return;
+  const type=document.getElementById('rmType').value;
+  const reason=(document.getElementById('rmReason').value||'').trim();
+  if(!reason){toast('Укажите причину');return}
+  const {data:s}=await sb.from('staff').select('*').eq('id',id).single();
+  if(!s){toast('Не найдено');return}
+  const field=type==='oral'?'oral':'warns';
+  if((s[field]||0)<=0){toast('Нет взысканий');return}
+  const {error}=await sb.from('staff').update({[field]:s[field]-1}).eq('id',id);
+  if(error){toast('Ошибка: '+error.message);return}
+  await sb.from('logs').insert([{staff_name:s.name,section,type:type==='oral'?'Снятие устного':'Снятие выговора',date:todayStr(),reason,issued_by:session.login}]);
+  closeModal();renderList(section);toast('Снято');
+}
+
+/* ============================================================
+   ИНФОРМАЦИЯ
+   ============================================================ */
+async function renderInfoSection(section){
+  const content=document.getElementById('sectionContent');
+  content.innerHTML='<div class="empty">Загрузка…</div>';
+  const {data}=await sb.from('info_messages').select('*').eq('section',section).order('created_at',{ascending:false});
+  const canManage=canManageInfo(section);
+  const list=data||[];
+  content.innerHTML=`
+    ${canManage?`<div style="margin-bottom:12px"><button class="btn primary" onclick="openInfoModal('${section}')">＋ Добавить</button></div>`:''}
+    <div class="panel" style="margin-top:0">
+      ${list.length?list.map(m=>`
+        <div class="info-msg">
+          <div class="info-head">
+            <strong>${esc(m.title)}</strong>
+            ${canManage?`<button class="btn danger small" onclick="deleteInfo('${m.id}','${section}')">×</button>`:''}
+          </div>
+          <p>${esc(m.content)}</p>
+          ${m.attachment?`<a href="${esc(m.attachment)}" target="_blank" class="btn small ghost">📎 Вложение</a>`:''}
+          <div style="margin-top:6px"><small>${esc(m.author||'—')} · ${fmt(String(m.created_at||'').slice(0,10))}</small></div>
+        </div>
+      `).join(''):'<div class="empty">Информации пока нет</div>'}
+    </div>
+  `;
+}
+
+function openInfoModal(section){
+  if(!canManageInfo(section))return;
+  modal(`
+    <h3>Новая информация · ${SECTION_TITLES[section]||section}</h3>
+    <form onsubmit="event.preventDefault();saveInfo('${section}')">
+      <div class="form-row"><label>Заголовок</label><input id="infoTitle" required maxlength="120"></div>
+      <div class="form-row"><label>Текст</label><textarea id="infoContent" required maxlength="3000"></textarea></div>
+      <div class="form-row"><label>Ссылка-вложение (необязательно)</label><input id="infoAttachment" type="url" placeholder="https://..."></div>
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" onclick="closeModal()">Отмена</button>
+        <button class="btn primary">Опубликовать</button>
+      </div>
+    </form>
+  `);
+}
+
+async function saveInfo(section){
+  if(!canManageInfo(section))return;
+  const title=document.getElementById('infoTitle').value.trim();
+  const content=document.getElementById('infoContent').value.trim();
+  const attachment=document.getElementById('infoAttachment').value.trim();
+  if(!title||!content){toast('Заполните поля');return}
+  const {error}=await sb.from('info_messages').insert([{section,title,content,attachment:attachment||null,author:session.login}]);
+  if(error){toast('Ошибка: '+error.message);return}
+  closeModal();
+  if(section==='main')renderHome();
+  else renderInfoSection(section);
+  toast('Опубликовано');
+}
+
+async function deleteInfo(id,section){
+  if(!canManageInfo(section))return;
+  if(!confirm('Удалить?'))return;
+  const {error}=await sb.from('info_messages').delete().eq('id',id);
+  if(error){toast('Ошибка: '+error.message);return}
+  if(section==='main')renderHome();
+  else renderInfoSection(section);
+}
+
+/* ============================================================
+   ПРОФИЛЬ
+   ============================================================ */
+async function renderProfile(){
+  const app=document.getElementById('app');
+  if(!session){app.innerHTML=`<div class="empty"><strong>Требуется вход</strong>Войдите в систему</div>`;return}
+  await reloadSession();
+  const roles=(session.roles||[]).map(r=>ROLE_LABELS[r]||r);
+  app.innerHTML=`
+    <div class="section-head"><h1>Профиль</h1><p>Ваши данные</p></div>
+    <div class="profile-card">
+      <div class="profile-avatar">${esc((session.login||'?')[0].toUpperCase())}</div>
+      <div class="profile-info">
+        <div class="profile-row"><label>Никнейм</label><div class="profile-val">${esc(session.login)}</div></div>
+        <div class="profile-row"><label>Должность</label><div class="profile-val">${esc(session.position||'—')}</div></div>
+        <div class="profile-row"><label>Роли</label><div class="profile-val">${roles.length?roles.map(r=>`<span class="role-badge">${esc(r)}</span>`).join(''):'<span style="color:var(--muted)">—</span>'}</div></div>
+        <div class="profile-row"><label>Монеты</label><div class="profile-val coins">🪙 ${session.coins||0}</div></div>
+      </div>
+    </div>
+  `;
+}
+
+/* ============================================================
+   АДМИН ПАНЕЛЬ
+   ============================================================ */
+function renderAdminPanel(){
+  const app=document.getElementById('app');
+  if(!isPanelAdmin()){app.innerHTML=`<div class="empty"><strong>Нет доступа</strong>Только для админов панели</div>`;return}
+  app.innerHTML=`
+    <div class="section-head"><h1>Админ панель</h1><p>Управление аккаунтами и магазинами</p></div>
+    <div class="tabs">
+      <button class="tab ${currentAdminTab==='pending'?'active':''}" onclick="setAdminTab('pending')">📥 Заявки</button>
+      <button class="tab ${currentAdminTab==='accounts'?'active':''}" onclick="setAdminTab('accounts')">👥 Аккаунты</button>
+      <button class="tab ${currentAdminTab==='shop'?'active':''}" onclick="setAdminTab('shop')">🛒 Магазины</button>
+    </div>
+    <div id="adminContent"><div class="empty">Загрузка…</div></div>
+  `;
+  if(currentAdminTab==='pending')renderPending();
+  else if(currentAdminTab==='accounts')renderAccounts();
+  else renderShopAdmin();
+}
+function setAdminTab(t){currentAdminTab=t;renderAdminPanel()}
+
+/* --- Заявки --- */
+async function renderPending(){
+  const el=document.getElementById('adminContent');
+  const {data}=await sb.from('accounts').select('*').eq('status','pending').order('created_at');
+  const list=data||[];
+  if(!list.length){el.innerHTML='<div class="empty">Нет заявок</div>';return}
+  el.innerHTML=`<div class="panel" style="margin-top:0">${list.map(a=>`
+    <div class="account-row">
+      <div>
+        <strong>${esc(a.login)}</strong>
+        <small>${esc(a.position||'—')} · ${fmt(String(a.created_at||'').slice(0,10))}</small>
+      </div>
+      <div class="actions">
+        <button class="btn small primary" onclick="openApproveModal('${a.id}')">Одобрить</button>
+        <button class="btn danger small" onclick="rejectAccount('${a.id}')">Отклонить</button>
+      </div>
+    </div>
+  `).join('')}</div>`;
+}
+
+function openApproveModal(id){
+  modal(`
+    <h3>Одобрить заявку</h3>
+    <p class="hint">Выберите до 2 ролей</p>
+    <form onsubmit="event.preventDefault();approveAccount('${id}')">
+      ${Object.entries(ROLE_LABELS).map(([r,l])=>`
+        <label class="role-cb-row">
+          <input type="checkbox" class="role-cb" value="${r}">
+          <span>${l}</span>
+        </label>
+      `).join('')}
+      <div id="approveErr" class="error"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" onclick="closeModal()">Отмена</button>
+        <button class="btn primary">Одобрить</button>
+      </div>
+    </form>
+  `);
+}
+
+async function approveAccount(id){
+  const roles=[...document.querySelectorAll('.role-cb:checked')].map(cb=>cb.value);
+  const err=document.getElementById('approveErr');
+  if(roles.length>2){err.textContent='Максимум 2 роли';return}
+  if(!roles.length){err.textContent='Выберите хотя бы одну роль';return}
+  const {error}=await sb.from('accounts').update({status:'active',roles}).eq('id',id);
+  if(error){err.textContent='Ошибка: '+error.message;return}
+  closeModal();renderPending();toast('Аккаунт одобрен');
+}
+
+async function rejectAccount(id){
+  if(!confirm('Отклонить заявку?'))return;
+  const {error}=await sb.from('accounts').update({status:'rejected'}).eq('id',id);
+  if(error){toast('Ошибка');return}
+  renderPending();toast('Заявка отклонена');
+}
+
+/* --- Аккаунты --- */
+async function renderAccounts(){
+  const el=document.getElementById('adminContent');
+  const {data}=await sb.from('accounts').select('*').eq('status','active').order('login');
+  const list=data||[];
+  if(!list.length){el.innerHTML='<div class="empty">Нет аккаунтов</div>';return}
+  el.innerHTML=`<div class="panel" style="margin-top:0">${list.map(a=>`
+    <div class="account-row">
+      <div>
+        <strong>${esc(a.login)}</strong>
+        <small>${esc(a.position||'—')} · ${(a.roles||[]).map(r=>ROLE_LABELS[r]||r).join(', ')||'нет ролей'} · 🪙 ${a.coins}</small>
+      </div>
+      <div class="actions">
+        <button class="btn small" onclick="openEditAccount('${a.id}')">Изменить</button>
+        <button class="btn danger small" onclick="deleteAccount('${a.id}')">×</button>
+      </div>
+    </div>
+  `).join('')}</div>`;
+}
+
+async function openEditAccount(id){
+  const {data:a}=await sb.from('accounts').select('*').eq('id',id).single();
+  if(!a){toast('Не найдено');return}
+  modal(`
+    <h3>Редактировать</h3>
+    <p class="hint">${esc(a.login)}</p>
+    <form onsubmit="event.preventDefault();saveAccount('${id}')">
+      <div class="form-row"><label>Должность</label><input id="accPos" value="${esc(a.position||'')}"></div>
+      <div class="form-row"><label>Роли (до 2)</label>
+        ${Object.entries(ROLE_LABELS).map(([r,l])=>`
+          <label class="role-cb-row">
+            <input type="checkbox" class="acc-role-cb" value="${r}" ${(a.roles||[]).includes(r)?'checked':''}>
+            <span>${l}</span>
+          </label>
+        `).join('')}
+      </div>
+      <div class="form-row"><label>Монеты</label><input id="accCoins" type="number" min="0" value="${a.coins||0}"></div>
+      <div class="form-row"><label>Новый пароль (пусто — не менять)</label><input id="accPass" type="password" minlength="6"></div>
+      <div id="accErr" class="error"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" onclick="closeModal()">Отмена</button>
+        <button class="btn primary">Сохранить</button>
+      </div>
+    </form>
+  `);
+}
+
+async function saveAccount(id){
+  const roles=[...document.querySelectorAll('.acc-role-cb:checked')].map(cb=>cb.value);
+  const err=document.getElementById('accErr');
+  if(roles.length>2){err.textContent='Максимум 2 роли';return}
+  const payload={
+    position:document.getElementById('accPos').value.trim(),
+    roles,
+    coins:Math.max(0,parseInt(document.getElementById('accCoins').value,10)||0),
+  };
+  const pass=document.getElementById('accPass').value;
+  if(pass)payload.password=pass;
+  const {error}=await sb.from('accounts').update(payload).eq('id',id);
+  if(error){err.textContent='Ошибка: '+error.message;return}
+  closeModal();renderAccounts();toast('Сохранено');
+  if(session&&session.id===id){await reloadSession();renderTopbar()}
+}
+
+async function deleteAccount(id){
+  if(session&&session.id===id){toast('Нельзя удалить себя');return}
+  if(!confirm('Удалить аккаунт?'))return;
+  const {error}=await sb.from('accounts').delete().eq('id',id);
+  if(error){toast('Ошибка: '+error.message);return}
+  renderAccounts();toast('Удалено');
+}
+
+/* --- Магазины --- */
+async function renderShopAdmin(){
+  const el=document.getElementById('adminContent');
+  el.innerHTML='<div class="empty">Загрузка…</div>';
+  const sections=['admins','leaders','helpers'];
+  let html='';
+  for(const sec of sections){
+    const {data:prods}=await sb.from('shop_products').select('*').eq('section',sec).order('builtin',{ascending:false});
+    const {data:rouls}=await sb.from('roulettes').select('*').eq('section',sec).order('price');
+    const products=prods||[], roulettes=rouls||[];
+    const customCount=products.filter(p=>!p.builtin).length;
+    html+=`<div class="panel">
+      <h2>${SECTION_TITLES[sec]}</h2>
+      <h3>Товары</h3>
+      ${products.map(p=>`
+        <div class="account-row">
+          <div><strong>${esc(p.name)}</strong><small>${p.builtin?'Стандартный':'Пользовательский'} · ${p.type}</small></div>
+          <div class="actions">
+            <input type="number" min="0" value="${p.price}" id="price-${p.id}" style="width:90px;background:#091119;border:1px solid #263743;color:#fff;border-radius:8px;padding:6px 8px">
+            <button class="btn small" onclick="saveProductPrice('${p.id}')">Сохранить</button>
+            ${!p.builtin?`<button class="btn danger small" onclick="deleteProduct('${p.id}','${sec}')">×</button>`:''}
+          </div>
+        </div>
+      `).join('')}
+      ${customCount<5?`<button class="btn small" style="margin-top:8px" onclick="openAddProduct('${sec}')">＋ Добавить товар (${customCount}/5)</button>`:`<small style="color:var(--muted);display:block;margin-top:8px">Лимит (5/5) достигнут</small>`}
+      <h3>Рулетки</h3>
+      ${roulettes.map(r=>`
+        <div class="account-row">
+          <div><strong>${esc(r.name)}</strong><small>Цена: ${r.price} · Призов: ${(r.prizes||[]).length}</small></div>
+          <div class="actions"><button class="btn small" onclick="openRouletteEditor('${r.id}')">Изменить</button></div>
+        </div>
+      `).join('')}
+    </div>`;
+  }
+  el.innerHTML=html;
+}
+
+async function saveProductPrice(id){
+  const val=Math.max(0,parseInt(document.getElementById('price-'+id).value,10)||0);
+  const {error}=await sb.from('shop_products').update({price:val}).eq('id',id);
+  if(error){toast('Ошибка');return}
+  toast('Цена обновлена');
+}
+
+function openAddProduct(section){
+  modal(`
+    <h3>Новый товар · ${SECTION_TITLES[section]}</h3>
+    <form onsubmit="event.preventDefault();addProduct('${section}')">
+      <div class="form-row"><label>Название</label><input id="npName" required maxlength="60"></div>
+      <div class="form-row"><label>Описание</label><textarea id="npDesc" maxlength="200"></textarea></div>
+      <div class="form-row"><label>Цена</label><input id="npPrice" type="number" min="0" required value="100"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" onclick="closeModal()">Отмена</button>
+        <button class="btn primary">Добавить</button>
+      </div>
+    </form>
+  `);
+}
+
+async function addProduct(section){
+  const name=document.getElementById('npName').value.trim();
+  const description=document.getElementById('npDesc').value.trim();
+  const price=Math.max(0,parseInt(document.getElementById('npPrice').value,10)||0);
+  if(!name){toast('Введите название');return}
+  const {count}=await sb.from('shop_products').select('*',{count:'exact',head:true}).eq('section',section).eq('builtin',false);
+  if((count||0)>=5){toast('Лимит 5');return}
+  const {error}=await sb.from('shop_products').insert([{section,type:'custom',name,description,price,builtin:false}]);
+  if(error){toast('Ошибка: '+error.message);return}
+  closeModal();renderShopAdmin();toast('Добавлено');
+}
+
+async function deleteProduct(id,section){
+  if(!confirm('Удалить товар?'))return;
+  const {error}=await sb.from('shop_products').delete().eq('id',id);
+  if(error){toast('Ошибка');return}
+  renderShopAdmin();
+}
+
+async function openRouletteEditor(id){
+  const {data:r}=await sb.from('roulettes').select('*').eq('id',id).single();
+  if(!r){toast('Не найдено');return}
+  const prizes=Array.isArray(r.prizes)?r.prizes:[];
+  modal(`
+    <h3>${esc(r.name)}</h3>
+    <p class="hint">Формат призов — JSON: [{"name":"...","type":"coins|nothing","value":100,"weight":10}]</p>
+    <form onsubmit="event.preventDefault();saveRoulette('${id}')">
+      <div class="form-row"><label>Цена прокрутки</label><input id="rlPrice" type="number" min="0" value="${r.price}"></div>
+      <div class="form-row"><label>Призы (JSON)</label>
+        <textarea id="rlPrizes" style="min-height:170px;font-family:monospace;font-size:12px">${esc(JSON.stringify(prizes,null,2))}</textarea>
+      </div>
+      <div id="rlErr" class="error"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" onclick="closeModal()">Отмена</button>
+        <button class="btn primary">Сохранить</button>
+      </div>
+    </form>
+  `);
+}
+
+async function saveRoulette(id){
+  const price=Math.max(0,parseInt(document.getElementById('rlPrice').value,10)||0);
+  const err=document.getElementById('rlErr');
+  let prizes;
+  try{prizes=JSON.parse(document.getElementById('rlPrizes').value)}
+  catch(e){err.textContent='Некорректный JSON';return}
+  if(!Array.isArray(prizes)){err.textContent='Призы должны быть массивом';return}
+  const {error}=await sb.from('roulettes').update({price,prizes}).eq('id',id);
+  if(error){err.textContent='Ошибка: '+error.message;return}
+  closeModal();renderShopAdmin();toast('Сохранено');
+}
+
+/* ============================================================
+   ИНИЦИАЛИЗАЦИЯ
+   ============================================================ */
+(async function init(){
+  session=loadSession();
+  if(session)await reloadSession();
+  showView('home');
+})();
+</script>
+</body>
+</html>
