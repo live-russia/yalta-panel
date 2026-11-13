@@ -145,8 +145,8 @@ footer{border-top:1px solid var(--line);padding:22px;text-align:center;color:#63
 /* ============================================================
    НАСТРОЙКА SUPABASE
    ============================================================ */
-const SUPABASE_URL = 'https://wwhebkquvhdmmbcmvzfc.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_GlBcOtQnK5I2KjPqCIe2-g_8t7iQiFK';
+const SUPABASE_URL = 'https://rmkpevcckejtpkopokhr.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_6n4DaH1i5cGXS6XWQ2AAtQ_ON63yV59';
 
 let sb = null;
 try {
@@ -154,9 +154,6 @@ try {
   else sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 } catch (e) { console.error('Ошибка Supabase:', e); }
 
-/* ============================================================
-   РОЛИ И СОСТОЯНИЕ
-   ============================================================ */
 const ROLE_LABELS = {
   panel_admin:  'Админ панели',
   sphere_head:  'Руководитель сферы',
@@ -173,9 +170,6 @@ let currentView = 'home';
 let currentTab = { admins:'list', leaders:'list', helpers:'list' };
 let currentAdminTab = 'pending';
 
-/* ============================================================
-   УТИЛИТЫ
-   ============================================================ */
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function todayStr(){return new Date().toISOString().slice(0,10)}
 function fmt(d){if(!d)return '—';const p=String(d).slice(0,10).split('-');return p.length===3?`${p[2]}.${p[1]}.${p[0]}`:d}
@@ -185,9 +179,6 @@ function closeModal(){document.getElementById('modalRoot').innerHTML=''}
 function saveSession(){try{if(session)localStorage.setItem('lr_acc',JSON.stringify(session));else localStorage.removeItem('lr_acc')}catch(e){}}
 function loadSession(){try{const r=localStorage.getItem('lr_acc');return r?JSON.parse(r):null}catch(e){return null}}
 
-/* ============================================================
-   ПРАВА
-   ============================================================ */
 function hasRole(...roles){return !!session && Array.isArray(session.roles) && roles.some(r=>session.roles.includes(r))}
 function isPanelAdmin(){return hasRole('panel_admin')}
 function isSphereHead(){return hasRole('sphere_head')}
@@ -214,9 +205,6 @@ function canManageInfo(section){
   return isSphereHead()||isPanelAdmin();
 }
 
-/* ============================================================
-   СЕССИЯ
-   ============================================================ */
 async function reloadSession(){
   if(!session||!sb)return;
   const {data} = await sb.from('accounts').select('*').eq('id',session.id).single();
@@ -229,9 +217,6 @@ function logout(){
   toast('Вы вышли');
 }
 
-/* ============================================================
-   РЕНДЕР ВЕРХНЕЙ ПАНЕЛИ И НИЖНЕЙ НАВИГАЦИИ
-   ============================================================ */
 function renderTopbar(){
   const el = document.getElementById('authZone');
   if(session){
@@ -399,9 +384,6 @@ async function renderHome(){
   `;
 }
 
-/* ============================================================
-   РАЗДЕЛЫ (admins / leaders / helpers)
-   ============================================================ */
 function renderSection(section){
   const app=document.getElementById('app');
   if(!session){app.innerHTML=`<div class="empty"><strong>Требуется вход</strong>Войдите или зарегистрируйтесь</div>`;return}
@@ -422,9 +404,6 @@ function renderSection(section){
 }
 function setTab(section,tab){currentTab[section]=tab;renderSection(section)}
 
-/* ============================================================
-   МАГАЗИН
-   ============================================================ */
 async function renderShop(section){
   const content=document.getElementById('sectionContent');
   content.innerHTML='<div class="empty">Загрузка…</div>';
@@ -576,9 +555,6 @@ async function spinRoulette(section,rouletteId){
   renderTopbar();
 }
 
-/* ============================================================
-   СПИСОК СОТРУДНИКОВ
-   ============================================================ */
 async function renderList(section){
   const content=document.getElementById('sectionContent');
   content.innerHTML='<div class="empty">Загрузка…</div>';
@@ -695,9 +671,6 @@ async function toggleInactive(id){
   renderList(s.section);
 }
 
-/* ============================================================
-   ВЗЫСКАНИЯ
-   ============================================================ */
 async function openSanction(section,id,type){
   if(!canEditList(section))return;
   const {data:s}=await sb.from('staff').select('*').eq('id',id).single();
@@ -730,14 +703,17 @@ async function issueSanction(section,id,type){
   const {data:s,error:e1}=await sb.from('staff').select('*').eq('id',id).single();
   if(e1||!s){toast('Ошибка чтения');return}
 
-  let newOral=s.oral,newWarns=s.warns,autoWarn=false;
+  let newOral=Number(s.oral)||0;
+  let newWarns=Number(s.warns)||0;
+  let autoWarn=false;
+
   if(oral){
-    if(s.oral>=2){toast('Максимум устных');return}
-    newOral=s.oral+1;
-    if(newOral>=2){newWarns=s.warns+1;autoWarn=true}
+    if(newOral>=2){toast('Максимум устных');return}
+    newOral+=1;
+    if(newOral===2){newOral=0;newWarns+=1;autoWarn=true;}
   } else {
-    if(s.warns>=3){toast('Максимум выговоров');return}
-    newWarns=s.warns+1;
+    if(newWarns>=3){toast('Максимум выговоров');return}
+    newWarns+=1;
   }
 
   const logs=[{staff_name:s.name,section,type:oral?'Устный выговор':'Выговор',date,reason,issued_by:session.login}];
@@ -796,9 +772,6 @@ async function removeSanction(section,id){
   closeModal();renderList(section);toast('Снято');
 }
 
-/* ============================================================
-   ИНФОРМАЦИЯ
-   ============================================================ */
 async function renderInfoSection(section){
   const content=document.getElementById('sectionContent');
   content.innerHTML='<div class="empty">Загрузка…</div>';
@@ -862,9 +835,6 @@ async function deleteInfo(id,section){
   else renderInfoSection(section);
 }
 
-/* ============================================================
-   ПРОФИЛЬ
-   ============================================================ */
 async function renderProfile(){
   const app=document.getElementById('app');
   if(!session){app.innerHTML=`<div class="empty"><strong>Требуется вход</strong>Войдите в систему</div>`;return}
@@ -884,9 +854,6 @@ async function renderProfile(){
   `;
 }
 
-/* ============================================================
-   АДМИН ПАНЕЛЬ
-   ============================================================ */
 function renderAdminPanel(){
   const app=document.getElementById('app');
   if(!isPanelAdmin()){app.innerHTML=`<div class="empty"><strong>Нет доступа</strong>Только для админов панели</div>`;return}
@@ -905,7 +872,6 @@ function renderAdminPanel(){
 }
 function setAdminTab(t){currentAdminTab=t;renderAdminPanel()}
 
-/* --- Заявки --- */
 async function renderPending(){
   const el=document.getElementById('adminContent');
   const {data}=await sb.from('accounts').select('*').eq('status','pending').order('created_at');
@@ -962,7 +928,6 @@ async function rejectAccount(id){
   renderPending();toast('Заявка отклонена');
 }
 
-/* --- Аккаунты --- */
 async function renderAccounts(){
   const el=document.getElementById('adminContent');
   const {data}=await sb.from('accounts').select('*').eq('status','active').order('login');
@@ -1034,7 +999,6 @@ async function deleteAccount(id){
   renderAccounts();toast('Удалено');
 }
 
-/* --- Магазины --- */
 async function renderShopAdmin(){
   const el=document.getElementById('adminContent');
   el.innerHTML='<div class="empty">Загрузка…</div>';
@@ -1146,11 +1110,49 @@ async function saveRoulette(id){
 }
 
 /* ============================================================
-   ИНИЦИАЛИЗАЦИЯ
+   ПРОВЕРКА СХЕМЫ + ИНИЦИАЛИЗАЦИЯ
    ============================================================ */
+const REQUIRED_TABLES = ['accounts','staff','info_messages','shop_products','roulettes','logs','purchases'];
+
+async function checkSchema(){
+  if(!sb)return {ok:false, missing:REQUIRED_TABLES};
+  const missing=[];
+  for(const t of REQUIRED_TABLES){
+    const {error}=await sb.from(t).select('*',{count:'exact',head:true});
+    if(error&&/schema cache|does not exist|not found/i.test(error.message))missing.push(t);
+  }
+  return {ok:missing.length===0, missing};
+}
+
+function showSchemaErrorScreen(missing){
+  document.getElementById('app').innerHTML=`
+    <div class="empty" style="max-width:640px;margin:40px auto;text-align:left">
+      <strong style="font-size:18px;color:#ff8790">⚠ База данных не готова</strong>
+      <p style="margin:14px 0 8px">Supabase не видит таблицы:</p>
+      <code style="display:block;background:#29161c;padding:10px;border-radius:8px;color:#ffb0b5;margin-bottom:14px">
+        ${missing.map(t=>'public.'+t).join('<br>')}
+      </code>
+      <p style="margin:14px 0 8px"><b>Что делать:</b></p>
+      <ol style="padding-left:20px;color:#c6d3dc;line-height:1.9">
+        <li>Открой Supabase → <b>SQL Editor</b> → вставь SQL-скрипт из чата.</li>
+        <li>В конце должно быть: <code style="background:#0b1219;padding:2px 6px;border-radius:5px">notify pgrst, 'reload schema';</code></li>
+        <li>Подожди 10 секунд → <button class="btn small primary" onclick="location.reload()">Перезагрузить</button></li>
+      </ol>
+      <p style="margin-top:14px;color:#8293a1;font-size:12px">
+        Ошибка «<i>Could not find the table in the schema cache</i>» — это кэш PostgREST
+        в Supabase, а не сайт.
+      </p>
+    </div>`;
+}
+
 (async function init(){
-  session=loadSession();
-  if(session)await reloadSession();
+  session = loadSession();
+  if(session) await reloadSession();
+  renderTopbar();
+  renderBottomnav();
+  document.getElementById('app').innerHTML = '<div class="empty">Проверка базы данных…</div>';
+  const schema = await checkSchema();
+  if(!schema.ok){ showSchemaErrorScreen(schema.missing); return; }
   showView('home');
 })();
 </script>
