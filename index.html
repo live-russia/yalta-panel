@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#080e14">
 <meta name="description" content="Администрация сервера Ялта — Live Russia">
 <title>Сервер Ялта · Live Russia</title>
-<script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=US8L_ENvnZs41Ibf5zsHXNGvrFivmzupIjOMf0U2fV8pAMo_7KWs9Qk2LxgEI56tkarOts3-J7S77i3xSP3QxgqmMFFDfXtM0E72CyyKkNFzamNQDKS1_7C_OttrqTIkE3UE3h_tTDpPeSLEALee4_ULx88Xxkgs9jqqCAaWsUib1j_DMuwMrzvMleD-3D_o3xUiaPsvZPA9iO6MtDI72w" charset="UTF-8"></script><style>
+<script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=fSq2j_cB8WcWU0hbB-EoVmXyQSAtZOlzBGz9V0p1e7FbNNJ7t0JVVTtSGWgI5zzi5Q-LFTnG9sqMAAcdRD4uyR0Ofooq0AETxxNf0Xe4DtbKqm-m4dcx8Q-HpKPyrBJCSheeSSkG1m5BvtvG3dLLE0BqmppxSH3wdQenKGy9e691cOEyjeVJZ1cllB7fq-bCXJQOnOgMDJpwtk6j62CbnA" charset="UTF-8"></script><style>
 
 :root{color-scheme:dark;--bg:#080e14;--panel:#101923;--panel2:#0c151e;--line:#233442;--text:#edf3f7;--muted:#91a3b2;--blue:#3b9cff;--green:#48d6a0;--red:#ff6574;--gold:#ffc66d}
 *{box-sizing:border-box}
@@ -37,7 +37,7 @@ p{color:#b5c4ce}.hero p{margin-bottom:0}
 .empty{padding:28px 18px;text-align:center;color:var(--muted);background:rgba(14,24,33,.7);border:1px dashed #2b4050;border-radius:12px}.empty strong{display:block;color:var(--text);margin-bottom:5px}
 .info-msg{padding:14px 0;border-bottom:1px solid var(--line)}.info-msg:last-child{border:0}.info-head{display:flex;justify-content:space-between;align-items:center;gap:10px}.info-msg p{white-space:pre-wrap;margin:7px 0}.info-msg small{color:var(--muted)}
 .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px}.table{width:100%;border-collapse:collapse;min-width:720px}.table th,.table td{padding:11px 12px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}.table th{font-size:12px;color:var(--muted);background:#111e29}.table tr:last-child td{border-bottom:0}.nick{font-weight:750}.level{color:#8ec8ff}.count{font-weight:800}.count.ok{color:var(--green)}.count.warn{color:var(--gold)}.count.bad{color:var(--red)}.inactive-row{opacity:.48}.badge-inactive{font-size:10px;color:var(--red);margin-left:7px}.actions{display:flex;gap:5px;flex-wrap:wrap}
-.shop-grid,.roulette-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}.shop-card{background:var(--panel2);border:1px solid var(--line);border-radius:13px;padding:16px;display:flex;flex-direction:column;gap:8px}.shop-card p{font-size:13px;margin:0;flex:1}.shop-icon{font-size:25px}.shop-price{font-size:21px;font-weight:850;color:#9ed0ff}.shop-price span{font-size:12px;color:var(--muted);font-weight:500}.coins{color:var(--gold)}
+
 .profile-card{display:flex;gap:22px;align-items:flex-start}.profile-avatar{width:62px;height:62px;border-radius:18px;background:#1a3c55;display:grid;place-items:center;font-size:27px;font-weight:900;color:#9ed0ff}.profile-info{flex:1}.profile-row{padding:8px 0;border-bottom:1px solid var(--line)}.profile-row:last-child{border:0}.profile-val{margin-top:3px;font-weight:650}.role-badge{display:inline-block;padding:4px 8px;border-radius:7px;background:#1b3446;color:#9ed0ff;margin:2px 4px 2px 0}
 .account-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 0;border-bottom:1px solid var(--line)}.account-row:last-child{border:0}.account-row small{display:block;color:var(--muted);font-size:12px;margin-top:3px}
 .form-row{display:flex;flex-direction:column;gap:6px;margin:12px 0}.form-row label{font-size:13px;color:#b7c7d2}.form-row input,.form-row textarea,.form-row select,.modal input:not([type=checkbox]),.modal textarea,.modal select{width:100%;background:#09131c;color:var(--text);border:1px solid #304555;border-radius:9px;padding:10px 11px;outline:none}.form-row input:focus,.form-row textarea:focus,.modal input:focus,.modal textarea:focus{border-color:var(--blue)}textarea{resize:vertical;min-height:90px}
@@ -95,12 +95,6 @@ const PERSON_LABEL_CAP = {
   admins:  'Администратор',
   leaders: 'Лидер',
   helpers: 'Агент поддержки',
-};
-// разделы магазинной информации
-const SHOP_SECTION = {
-  admins:  'shop_admins',
-  leaders: 'shop_leaders',
-  helpers: 'shop_helpers',
 };
 
 let session = null;
@@ -177,7 +171,8 @@ async function reloadSession(){
     console.error('Не удалось обновить сессию:',e);
   }
 }
-function logout(){
+async function logout(){
+  await writeAuditLog('Выход из аккаунта',`Пользователь: ${session?.login||'—'}`);
   session=null;saveSession();
   renderTopbar();showView('home');
   toast('Вы вышли');
@@ -263,6 +258,7 @@ async function doLogin(){
     if(acc.status==='pending'){errEl.textContent='Заявка ещё на рассмотрении';return}
     if(acc.status==='rejected'){errEl.textContent='Заявка отклонена';return}
     session=acc;saveSession();
+    await writeAuditLog('Вход в аккаунт',`Пользователь: ${acc.login}`);
     closeModal();renderTopbar();showView('home');
     toast('Добро пожаловать, '+acc.login);
   }catch(e){errEl.textContent='Ошибка: '+(e.message||e)}
@@ -360,186 +356,15 @@ function renderSection(section){
   app.innerHTML=`
     <div class="section-head"><h1>${SECTION_TITLES[section]}</h1><p>Раздел ${SECTION_LABELS[section]}</p></div>
     <div class="tabs">
-      <button class="tab ${tab==='shop'?'active':''}" onclick="setTab('${section}','shop')">🛒 Магазин</button>
       <button class="tab ${tab==='list'?'active':''}" onclick="setTab('${section}','list')">📋 Список</button>
       <button class="tab ${tab==='info'?'active':''}" onclick="setTab('${section}','info')">ℹ Информация</button>
     </div>
     <div id="sectionContent"></div>
   `;
-  if(tab==='shop')renderShop(section);
-  else if(tab==='list')renderList(section);
+  if(tab==='list')renderList(section);
   else renderInfoSection(section);
 }
 function setTab(section,tab){currentTab[section]=tab;renderSection(section)}
-
-/* ============================================================
-   МАГАЗИН
-   ============================================================ */
-async function renderShop(section){
-  const content=document.getElementById('sectionContent');
-  if(!sb){content.innerHTML='<div class="empty">Нет подключения к базе данных</div>';return}
-  content.innerHTML='<div class="empty">Загрузка…</div>';
-  const shopSection = SHOP_SECTION[section];
-  const [prods,rouls,infos]=await Promise.all([
-    sb.from('shop_products').select('*').eq('section',section).order('builtin',{ascending:false}),
-    sb.from('roulettes').select('*').eq('section',section).order('price'),
-    sb.from('info_messages').select('*').eq('section',shopSection).order('created_at',{ascending:false}),
-  ]);
-  const products=(prods.data||[]).filter(p => !p.hidden);
-  const roulettes=rouls.data||[];
-  const shopInfo=infos.data||[];
-  const coins = session?.coins||0;
-  const canManageShopInfo = canManageInfo(shopSection);
-
-  content.innerHTML=`
-    <div class="panel">
-      <div class="panel-head">
-        <div><div class="eyebrow">Information</div><h2>Информация магазина</h2></div>
-        ${canManageShopInfo?`<button class="btn primary small" onclick="openInfoModal('${shopSection}')">＋ Добавить</button>`:''}
-      </div>
-      <div>
-        ${shopInfo.length?shopInfo.map(m=>`
-          <div class="info-msg">
-            <div class="info-head">
-              <strong>${esc(m.title)}</strong>
-              ${canManageShopInfo?`<button class="btn danger small" onclick="deleteInfo('${m.id}','${shopSection}')">×</button>`:''}
-            </div>
-            <p>${esc(m.content)}</p>
-            ${m.attachment?`<a href="${esc(m.attachment)}" target="_blank" class="btn small ghost">📎 Вложение</a>`:''}
-            <div style="margin-top:6px"><small>${esc(m.author||'—')} · ${fmt(String(m.created_at||'').slice(0,10))}</small></div>
-          </div>
-        `).join(''):'<div class="empty" style="padding:26px 20px">Информации магазина пока нет</div>'}
-      </div>
-    </div>
-    <div class="panel">
-      <div class="panel-head"><h2>Товары</h2><span class="coins" style="font-size:16px">🪙 ${coins}</span></div>
-      <div class="shop-grid">
-        ${products.length?products.map(p=>productCard(section,p,coins)).join(''):'<div class="empty">Товаров нет</div>'}
-      </div>
-    </div>
-    <div class="panel">
-      <h2>🎰 Рулетки</h2>
-      <div class="roulette-grid" style="margin-top:14px">
-        ${roulettes.length?roulettes.map(r=>rouletteCard(section,r,coins)).join(''):'<div class="empty">Рулеток нет</div>'}
-      </div>
-    </div>
-  `;
-}
-
-function productCard(section,p,coins){
-  const can=coins>=p.price;
-  const icon = p.type==='warn_removal'?'⚠️':p.type==='oral_removal'?'💬':'🎁';
-  return `
-    <div class="shop-card">
-      <div class="shop-icon">${icon}</div>
-      <strong>${esc(p.name)}</strong>
-      <p>${esc(p.description||'—')}</p>
-      <div class="shop-price">${p.price} <span>монет</span></div>
-      <button class="btn primary" ${can?'':'disabled'} onclick="buyProduct('${section}','${p.id}')">Купить</button>
-    </div>
-  `;
-}
-
-function rouletteCard(section,r,coins){
-  const can=coins>=r.price;
-  const prizes=Array.isArray(r.prizes)?r.prizes:[];
-  const preview=prizes.length?prizes.slice(0,3).map(p=>esc(p.name)).join(' · '):'Призы не настроены';
-  return `
-    <div class="shop-card">
-      <div class="shop-icon">🎰</div>
-      <strong>${esc(r.name)}</strong>
-      <p>${preview}${prizes.length>3?' …':''}</p>
-      <div class="shop-price">${r.price} <span>монет</span></div>
-      <button class="btn primary" ${can?'':'disabled'} onclick="spinRoulette('${section}','${r.id}')">Крутить</button>
-    </div>
-  `;
-}
-
-/* Покупка — только СЕБЕ */
-async function buyProduct(section,productId){
-  if(!session){toast('Войдите');return}
-  const {data:p}=await sb.from('shop_products').select('*').eq('id',productId).single();
-  if(!p){toast('Товар не найден');return}
-  if(p.hidden){toast('Товар недоступен');return}
-  if(session.coins<p.price){toast('Недостаточно монет');return}
-
-  if(p.type==='warn_removal'||p.type==='oral_removal'){
-    const {data:selfArr}=await sb.from('staff').select('*')
-      .eq('section',section).eq('name',session.login).limit(1);
-    if(!selfArr||!selfArr.length){
-      toast('Вы не числитесь в разделе '+SECTION_LABELS[section]);
-      return;
-    }
-    await applyProduct(section,p.id,selfArr[0].id);
-  } else {
-    await completeCustomPurchase(section,p);
-  }
-}
-
-async function applyProduct(section,productId,staffId){
-  const {data:p}=await sb.from('shop_products').select('*').eq('id',productId).single();
-  const {data:s}=await sb.from('staff').select('*').eq('id',staffId).single();
-  if(!p||!s){toast('Ошибка');return}
-  if(session.coins<p.price){toast('Недостаточно монет');return}
-  const field=p.type==='warn_removal'?'warns':'oral';
-  if((s[field]||0)<=0){toast('У вас нет активных взысканий этого типа');return}
-  const {error:eu}=await sb.from('staff').update({[field]:s[field]-1}).eq('id',staffId);
-  if(eu){toast('Ошибка: '+eu.message);return}
-  await sb.from('logs').insert([{
-    staff_name:s.name,section,
-    type:p.type==='warn_removal'?'Снятие выговора (магазин)':'Снятие устного (магазин)',
-    date:todayStr(),reason:'Покупка в магазине',issued_by:session.login,
-  }]);
-  const newCoins=session.coins-p.price;
-  const {error:ec}=await sb.from('accounts').update({coins:newCoins}).eq('id',session.id);
-  if(ec){toast('Ошибка: '+ec.message);return}
-  session.coins=newCoins;saveSession();
-  await sb.from('purchases').insert([{account_id:session.id,section,product_id:p.id,product_name:p.name,price:p.price}]);
-  closeModal();renderTopbar();
-  toast('Покупка успешна');
-  renderShop(section);
-}
-
-async function completeCustomPurchase(section,p){
-  const newCoins=session.coins-p.price;
-  const {error}=await sb.from('accounts').update({coins:newCoins}).eq('id',session.id);
-  if(error){toast('Ошибка: '+error.message);return}
-  session.coins=newCoins;saveSession();
-  await sb.from('purchases').insert([{account_id:session.id,section,product_id:p.id,product_name:p.name,price:p.price}]);
-  renderTopbar();
-  toast('Покупка успешна');
-  renderShop(section);
-}
-
-async function spinRoulette(section,rouletteId){
-  if(!session){toast('Войдите');return}
-  const {data:r}=await sb.from('roulettes').select('*').eq('id',rouletteId).single();
-  if(!r){toast('Рулетка не найдена');return}
-  if(session.coins<r.price){toast('Недостаточно монет');return}
-  const prizes=Array.isArray(r.prizes)?r.prizes:[];
-  if(!prizes.length){toast('Призы не настроены');return}
-
-  const totalWeight=prizes.reduce((s,x)=>s+(x.weight||1),0);
-  let roll=Math.random()*totalWeight, picked=prizes[prizes.length-1];
-  for(const pz of prizes){roll-=(pz.weight||1);if(roll<=0){picked=pz;break}}
-
-  let coinsAdd = picked.type==='coins' ? (picked.value||0) : 0;
-  const finalCoins = session.coins - r.price + coinsAdd;
-  const {error}=await sb.from('accounts').update({coins:finalCoins}).eq('id',session.id);
-  if(error){toast('Ошибка: '+error.message);return}
-  session.coins=finalCoins;saveSession();
-
-  modal(`
-    <h3>Результат</h3>
-    <div style="text-align:center;padding:24px 0">
-      <div style="font-size:52px">🎉</div>
-      <div style="font-size:20px;font-weight:800;margin-top:10px">${esc(picked.name||'Пусто')}</div>
-      ${coinsAdd?`<div style="color:var(--green);margin-top:8px;font-size:16px">+${coinsAdd} монет</div>`:''}
-    </div>
-    <div class="modal-actions"><button class="btn primary" onclick="closeModal();renderShop('${section}')">OK</button></div>
-  `);
-  renderTopbar();
-}
 
 /* ============================================================
    СПИСОК
@@ -569,6 +394,7 @@ async function renderList(section){
       <table class="table">
         <thead><tr>
           <th>Никнейм</th>
+          <th>ВКонтакте</th>
           ${showLevel?'<th>Уровень</th>':''}
           ${showPosition?`<th>${positionLabel}</th>`:''}
           <th>Выговоры</th><th>Устные</th><th>Назначен</th>
@@ -576,16 +402,33 @@ async function renderList(section){
           ${editable?'<th>Действия</th>':''}
         </tr></thead>
         <tbody>
-          ${arr.length?arr.map(s=>staffRow(section,s,editable,showPromoted,showPosition,showLevel)).join(''):'<tr><td colspan="10"><div class="empty">Список пуст</div></td></tr>'}
+          ${arr.length?arr.map(s=>staffRow(section,s,editable,showPromoted,showPosition,showLevel)).join(''):'<tr><td colspan="12"><div class="empty">Список пуст</div></td></tr>'}
         </tbody>
       </table>
     </div>
+    <div id="sectionSanctionLogs"></div>
   `;
+  renderSectionSanctionLogs(section);
+}
+
+async function renderSectionSanctionLogs(section){
+  const el=document.getElementById('sectionSanctionLogs');
+  if(!el)return;
+  const {data,error}=await sb.from('logs').select('*').eq('section',section)
+    .in('type',['Выговор','Устный выговор','Автоматический выговор','Снятие выговора','Снятие устного','Удаление из состава'])
+    .order('date',{ascending:false}).limit(200);
+  if(error){el.innerHTML=`<div class="panel"><h2>Логи выговоров</h2><p class="hint">Ошибка загрузки: ${esc(error.message)}</p></div>`;return}
+  const rows=data||[];
+  el.innerHTML=`<div class="panel">
+    <div class="panel-head"><h2>Логи выдачи и снятия выговоров</h2><span class="hint">${SECTION_LABELS[section]}</span></div>
+    ${rows.length?rows.map(r=>`<div class="account-row"><div><strong>${esc(r.type)}</strong><small>${esc(r.staff_name||'—')} · ${fmt(r.date)} · ${esc(r.issued_by||'—')}</small>${r.reason?`<small style="white-space:normal">${esc(r.reason)}</small>`:''}</div></div>`).join(''):'<div class="empty">Логов пока нет</div>'}
+  </div>`;
 }
 
 function staffRow(section,s,editable,showPromoted,showPosition,showLevel){
   return `<tr class="${s.inactive?'inactive-row':''}">
     <td><span class="nick">${esc(s.name)}</span>${s.inactive?'<span class="badge-inactive">НЕАКТИВ</span>':''}</td>
+    <td>${s.vk?`<a href="${esc(s.vk)}" target="_blank" rel="noopener noreferrer">Открыть профиль</a>`:'—'}</td>
     ${showLevel?`<td><span class="level">${s.level} уровень</span></td>`:''}
     ${showPosition?`<td>${esc(s.position)}</td>`:''}
     <td><span class="count ${s.warns>=3?'bad':s.warns?'warn':'ok'}">${s.warns}/3</span></td>
@@ -611,7 +454,7 @@ async function openStaffModal(section,id){
     if(!data){toast('Не найдено');return}
     s=data;
   } else {
-    s={name:'',level:1,position:'',appointed:todayStr(),promoted:null};
+    s={name:'',level:1,position:'',vk:'',appointed:todayStr(),promoted:null};
   }
   const showPromoted=section==='admins';
   const showPosition=section!=='helpers';
@@ -622,6 +465,7 @@ async function openStaffModal(section,id){
     <form onsubmit="event.preventDefault();saveStaff('${section}','${id||''}')">
       <div class="form-grid">
         <div class="form-row"><label>Никнейм</label><input id="stName" required value="${esc(s.name)}"></div>
+        <div class="form-row"><label>Ссылка на профиль ВКонтакте</label><input id="stVk" type="url" placeholder="https://vk.com/..." value="${esc(s.vk||'')}"></div>
         <div class="form-row"><label>Уровень (1–8)</label><input id="stLevel" type="number" min="1" max="8" required value="${s.level}"></div>
         ${showPosition?`<div class="form-row full"><label>${positionLabel}</label><input id="stPosition" required value="${esc(s.position)}"></div>`:''}
         <div class="form-row"><label>Дата назначения</label><input id="stAppointed" type="date" required value="${String(s.appointed).slice(0,10)}"></div>
@@ -642,6 +486,7 @@ async function saveStaff(section,id){
   const payload={
     section,
     name:document.getElementById('stName').value.trim(),
+    vk:(document.getElementById('stVk').value||'').trim()||null,
     level:Math.min(8,Math.max(1,parseInt(document.getElementById('stLevel').value,10)||1)),
     appointed:document.getElementById('stAppointed').value,
   };
@@ -815,9 +660,7 @@ async function renderInfoSection(section){
 
 function openInfoModal(section){
   if(!canManageInfo(section))return;
-  const title = section.startsWith('shop_')
-    ? `Информация магазина · ${SECTION_TITLES[section.replace(/^shop_/,'')]}`
-    : `Новая информация · ${SECTION_TITLES[section]||section}`;
+  const title = `Новая информация · ${SECTION_TITLES[section]||section}`;
   modal(`
     <h3>${title}</h3>
     <form onsubmit="event.preventDefault();saveInfo('${section}')">
@@ -842,7 +685,6 @@ async function saveInfo(section){
   if(error){toast('Ошибка: '+error.message);return}
   closeModal();
   if(section==='main')renderHome();
-  else if(section.startsWith('shop_'))renderShop(section.replace(/^shop_/,''));
   else renderInfoSection(section);
   await writeAuditLog('Публикация информации',`${SECTION_TITLES[section]||section}: ${title}`);
   toast('Опубликовано');
@@ -854,7 +696,6 @@ async function deleteInfo(id,section){
   const {error}=await sb.from('info_messages').delete().eq('id',id);
   if(error){toast('Ошибка: '+error.message);return}
   if(section==='main')renderHome();
-  else if(section.startsWith('shop_'))renderShop(section.replace(/^shop_/,''));
   else renderInfoSection(section);
   await writeAuditLog('Удаление информации',`${SECTION_TITLES[section]||section}; запись ID: ${id}`);
 }
@@ -875,7 +716,6 @@ async function renderProfile(){
         <div class="profile-row"><label>Никнейм</label><div class="profile-val">${esc(session.login)}</div></div>
         <div class="profile-row"><label>Должность</label><div class="profile-val">${esc(session.position||'—')}</div></div>
         <div class="profile-row"><label>Роли</label><div class="profile-val">${roles.length?roles.map(r=>`<span class="role-badge">${esc(r)}</span>`).join(''):'<span style="color:var(--muted)">—</span>'}</div></div>
-        <div class="profile-row"><label>Монеты</label><div class="profile-val coins">🪙 ${session.coins||0}</div></div>
       </div>
     </div>
   `;
@@ -888,11 +728,10 @@ function renderAdminPanel(){
   const app=document.getElementById('app');
   if(!isPanelAdmin()){app.innerHTML=`<div class="empty"><strong>Нет доступа</strong>Только для админов панели</div>`;return}
   app.innerHTML=`
-    <div class="section-head"><h1>Админ панель</h1><p>Управление аккаунтами и магазинами</p></div>
+    <div class="section-head"><h1>Админ панель</h1><p>Управление аккаунтами и журнал действий</p></div>
     <div class="tabs">
       <button class="tab ${currentAdminTab==='pending'?'active':''}" onclick="setAdminTab('pending')">📥 Заявки</button>
       <button class="tab ${currentAdminTab==='accounts'?'active':''}" onclick="setAdminTab('accounts')">👥 Аккаунты</button>
-      <button class="tab ${currentAdminTab==='shop'?'active':''}" onclick="setAdminTab('shop')">🛒 Магазины</button>
       <button class="tab ${currentAdminTab==='logs'?'active':''}" onclick="setAdminTab('logs')">📋 Логи действий</button>
     </div>
     <div id="adminContent"><div class="empty">Загрузка…</div></div>
@@ -900,7 +739,6 @@ function renderAdminPanel(){
   if(currentAdminTab==='pending')renderPending();
   else if(currentAdminTab==='accounts')renderAccounts();
   else if(currentAdminTab==='logs')renderAuditLogs();
-  else renderShopAdmin();
 }
 function setAdminTab(t){currentAdminTab=t;renderAdminPanel()}
 
@@ -908,16 +746,16 @@ async function renderAuditLogs(){
   const el=document.getElementById('adminContent');
   if(!el)return;
   el.innerHTML='<div class="empty">Загрузка журнала…</div>';
-  const {data,error}=await sb.from('logs').select('*').order('date',{ascending:false}).limit(300);
+  const {data,error}=await sb.from('logs').select('*').order('date',{ascending:false}).limit(500);
   if(error){
     el.innerHTML=`<div class="empty">Не удалось загрузить логи: ${esc(error.message)}</div>`;
     return;
   }
   const rows=data||[];
-  if(!rows.length){el.innerHTML='<div class="empty">Записей пока нет</div>';return}
   el.innerHTML=`<div class="panel" style="margin-top:0">
-    <div class="account-row"><strong>Последние действия</strong><small>Показаны последние 300 записей</small></div>
-    ${rows.map(r=>`
+    <div class="account-row"><strong>Все действия</strong><small>Последние 500 записей</small></div>
+    <div class="form-row"><label>Поиск по нику</label><input id="auditSearch" placeholder="Введите ник..." oninput="filterAuditLogs()"></div>
+    <div id="auditLogRows">${rows.length?rows.map(r=>`
       <div class="account-row">
         <div style="min-width:0">
           <strong>${esc(r.type||'Действие')}</strong>
@@ -926,8 +764,14 @@ async function renderAuditLogs(){
           ${r.staff_name&&r.staff_name!=='—'?`<small>Сотрудник: ${esc(r.staff_name)}</small>`:''}
         </div>
       </div>
-    `).join('')}
+    `).join(''):'<div class="empty">Записей пока нет</div>'}</div>
   </div>`;
+}
+function filterAuditLogs(){
+  const q=(document.getElementById('auditSearch')?.value||'').trim().toLowerCase();
+  document.querySelectorAll('#auditLogRows .account-row').forEach(row=>{
+    row.style.display=row.textContent.toLowerCase().includes(q)?'':'none';
+  });
 }
 
 async function renderPending(){
@@ -997,7 +841,7 @@ async function renderAccounts(){
     <div class="account-row">
       <div>
         <strong>${esc(a.login)}</strong>
-        <small>${esc(a.position||'—')} · ${(a.roles||[]).map(r=>ROLE_LABELS[r]||r).join(', ')||'нет ролей'} · 🪙 ${a.coins}</small>
+        <small>${esc(a.position||'—')} · ${(a.roles||[]).map(r=>ROLE_LABELS[r]||r).join(', ')||'нет ролей'}</small>
       </div>
       <div class="actions">
         <button class="btn small" onclick="openEditAccount('${a.id}')">Изменить</button>
@@ -1023,7 +867,6 @@ async function openEditAccount(id){
           </label>
         `).join('')}
       </div>
-      <div class="form-row"><label>Монеты</label><input id="accCoins" type="number" min="0" value="${a.coins||0}"></div>
       <div class="form-row"><label>Новый пароль (пусто — не менять)</label><input id="accPass" type="password" minlength="6"></div>
       <div id="accErr" class="error"></div>
       <div class="modal-actions">
@@ -1041,7 +884,6 @@ async function saveAccount(id){
   const payload={
     position:document.getElementById('accPos').value.trim(),
     roles,
-    coins:Math.max(0,parseInt(document.getElementById('accCoins').value,10)||0),
   };
   const pass=document.getElementById('accPass').value;
   if(pass)payload.password=pass;
@@ -1061,139 +903,10 @@ async function deleteAccount(id){
   renderAccounts();toast('Удалено');
 }
 
-async function renderShopAdmin(){
-  const el=document.getElementById('adminContent');
-  el.innerHTML='<div class="empty">Загрузка…</div>';
-  const sections=['admins','leaders','helpers'];
-  let html='';
-  for(const sec of sections){
-    const {data:prods}=await sb.from('shop_products').select('*').eq('section',sec).order('builtin',{ascending:false});
-    const {data:rouls}=await sb.from('roulettes').select('*').eq('section',sec).order('price');
-    const products=prods||[], roulettes=rouls||[];
-    const customCount=products.filter(p=>!p.builtin).length;
-    html+=`<div class="panel">
-      <h2>${SECTION_TITLES[sec]}</h2>
-      <h3>Товары</h3>
-      ${products.map(p=>`
-        <div class="account-row">
-          <div><strong>${esc(p.name)}</strong><small>${p.builtin?'Стандартный':'Пользовательский'} · ${p.type}${p.hidden?' · 🚫 скрыт':''}</small></div>
-          <div class="actions">
-            <input type="number" min="0" value="${p.price}" id="price-${p.id}" style="width:90px;background:#091119;border:1px solid #263743;color:#fff;border-radius:8px;padding:6px 8px">
-            <button class="btn small" onclick="saveProductPrice('${p.id}')">Сохранить</button>
-            ${(p.type==='warn_removal'||p.type==='oral_removal')?`
-              <button class="btn small ${p.hidden?'danger':''}" onclick="toggleProductHidden('${p.id}')">
-                ${p.hidden?'🚫 Скрыт':'👁 Виден'}
-              </button>
-            `:''}
-            ${!p.builtin?`<button class="btn danger small" onclick="deleteProduct('${p.id}','${sec}')">×</button>`:''}
-          </div>
-        </div>
-      `).join('')}
-      ${customCount<5?`<button class="btn small" style="margin-top:8px" onclick="openAddProduct('${sec}')">＋ Добавить товар (${customCount}/5)</button>`:`<small style="color:var(--muted);display:block;margin-top:8px">Лимит (5/5) достигнут</small>`}
-      <h3>Рулетки</h3>
-      ${roulettes.map(r=>`
-        <div class="account-row">
-          <div><strong>${esc(r.name)}</strong><small>Цена: ${r.price} · Призов: ${(r.prizes||[]).length}</small></div>
-          <div class="actions"><button class="btn small" onclick="openRouletteEditor('${r.id}')">Изменить</button></div>
-        </div>
-      `).join('')}
-    </div>`;
-  }
-  el.innerHTML=html;
-}
-
-async function saveProductPrice(id){
-  const val=Math.max(0,parseInt(document.getElementById('price-'+id).value,10)||0);
-  const {error}=await sb.from('shop_products').update({price:val}).eq('id',id);
-  if(error){toast('Ошибка');return}
-  await writeAuditLog('Изменение цены товара',`Товар ID: ${id}; новая цена: ${val}`);
-  toast('Цена обновлена');
-}
-
-async function toggleProductHidden(id){
-  const {data:p}=await sb.from('shop_products').select('*').eq('id',id).single();
-  if(!p)return;
-  const {error}=await sb.from('shop_products').update({hidden:!p.hidden}).eq('id',id);
-  if(error){toast('Ошибка: '+error.message);return}
-  await writeAuditLog(p.hidden?'Показ товара':'Скрытие товара',`Товар: ${p.name}`);
-  renderShopAdmin();
-  toast(p.hidden?'Товар показан':'Товар скрыт');
-}
-
-function openAddProduct(section){
-  modal(`
-    <h3>Новый товар · ${SECTION_TITLES[section]}</h3>
-    <form onsubmit="event.preventDefault();addProduct('${section}')">
-      <div class="form-row"><label>Название</label><input id="npName" required maxlength="60"></div>
-      <div class="form-row"><label>Описание</label><textarea id="npDesc" maxlength="200"></textarea></div>
-      <div class="form-row"><label>Цена</label><input id="npPrice" type="number" min="0" required value="100"></div>
-      <div class="modal-actions">
-        <button type="button" class="btn ghost" onclick="closeModal()">Отмена</button>
-        <button class="btn primary">Добавить</button>
-      </div>
-    </form>
-  `);
-}
-
-async function addProduct(section){
-  const name=document.getElementById('npName').value.trim();
-  const description=document.getElementById('npDesc').value.trim();
-  const price=Math.max(0,parseInt(document.getElementById('npPrice').value,10)||0);
-  if(!name){toast('Введите название');return}
-  const {count}=await sb.from('shop_products').select('*',{count:'exact',head:true}).eq('section',section).eq('builtin',false);
-  if((count||0)>=5){toast('Лимит 5');return}
-  const {error}=await sb.from('shop_products').insert([{section,type:'custom',name,description,price,builtin:false}]);
-  if(error){toast('Ошибка: '+error.message);return}
-  await writeAuditLog('Добавление товара',`Раздел: ${SECTION_TITLES[section]||section}; товар: ${name}`);
-  closeModal();renderShopAdmin();toast('Добавлено');
-}
-
-async function deleteProduct(id,section){
-  if(!confirm('Удалить товар?'))return;
-  const {error}=await sb.from('shop_products').delete().eq('id',id);
-  if(error){toast('Ошибка');return}
-  await writeAuditLog('Удаление товара',`Товар ID: ${id}; раздел: ${SECTION_TITLES[section]||section}`);
-  renderShopAdmin();
-}
-
-async function openRouletteEditor(id){
-  const {data:r}=await sb.from('roulettes').select('*').eq('id',id).single();
-  if(!r){toast('Не найдено');return}
-  const prizes=Array.isArray(r.prizes)?r.prizes:[];
-  modal(`
-    <h3>${esc(r.name)}</h3>
-    <p class="hint">Формат призов — JSON: [{"name":"...","type":"coins|nothing","value":100,"weight":10}]</p>
-    <form onsubmit="event.preventDefault();saveRoulette('${id}')">
-      <div class="form-row"><label>Цена прокрутки</label><input id="rlPrice" type="number" min="0" value="${r.price}"></div>
-      <div class="form-row"><label>Призы (JSON)</label>
-        <textarea id="rlPrizes" style="min-height:170px;font-family:monospace;font-size:12px">${esc(JSON.stringify(prizes,null,2))}</textarea>
-      </div>
-      <div id="rlErr" class="error"></div>
-      <div class="modal-actions">
-        <button type="button" class="btn ghost" onclick="closeModal()">Отмена</button>
-        <button class="btn primary">Сохранить</button>
-      </div>
-    </form>
-  `);
-}
-
-async function saveRoulette(id){
-  const price=Math.max(0,parseInt(document.getElementById('rlPrice').value,10)||0);
-  const err=document.getElementById('rlErr');
-  let prizes;
-  try{prizes=JSON.parse(document.getElementById('rlPrizes').value)}
-  catch(e){err.textContent='Некорректный JSON';return}
-  if(!Array.isArray(prizes)){err.textContent='Призы должны быть массивом';return}
-  const {error}=await sb.from('roulettes').update({price,prizes}).eq('id',id);
-  if(error){err.textContent='Ошибка: '+error.message;return}
-  await writeAuditLog('Изменение рулетки',`Рулетка ID: ${id}; цена: ${price}; призов: ${prizes.length}`);
-  closeModal();renderShopAdmin();toast('Сохранено');
-}
-
 /* ============================================================
    ПРОВЕРКА СХЕМЫ + ИНИЦИАЛИЗАЦИЯ
    ============================================================ */
-const REQUIRED_TABLES = ['accounts','staff','info_messages','shop_products','roulettes','logs','purchases'];
+const REQUIRED_TABLES = ['accounts','staff','info_messages','logs'];
 
 async function checkSchema(){
   if(!sb)return {ok:false, missing:REQUIRED_TABLES, connection:true};
@@ -1240,7 +953,6 @@ function showSchemaErrorScreen(missing){
   }
   showView('home');
 })();
-</script>
 </script>
 </body>
 </html>
