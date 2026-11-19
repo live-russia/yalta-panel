@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#080e14">
 <meta name="description" content="Администрация сервера Ялта — Live Russia">
 <title>Сервер Ялта · Live Russia</title>
-<script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=fSq2j_cB8WcWU0hbB-EoVmXyQSAtZOlzBGz9V0p1e7FbNNJ7t0JVVTtSGWgI5zzi5Q-LFTnG9sqMAAcdRD4uyR0Ofooq0AETxxNf0Xe4DtbKqm-m4dcx8Q-HpKPyrBJCSheeSSkG1m5BvtvG3dLLE0BqmppxSH3wdQenKGy9e691cOEyjeVJZ1cllB7fq-bCXJQOnOgMDJpwtk6j62CbnA" charset="UTF-8"></script><style>
+<script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=3XppNz4hAikBbyThkqKZyeU0aroVzAq2KfZJcwoBohPme78D2ziOyUQ_GIEz-adL2doNL0btp2394gMKv-gRp3B31TUus53OeyzPAd1LZjXCRNwfiso-jE9HC3Kz182ACWXAYMQEaCgzLhPUmD14n3hKoKekO3OHG3Z9TcVSr6KE9fPLqAfuiA_x6eX2nlH3PiK-mTwBLRDJ-LUk9mdaUA" charset="UTF-8"></script><style>
 
 :root{color-scheme:dark;--bg:#080e14;--panel:#101923;--panel2:#0c151e;--line:#233442;--text:#edf3f7;--muted:#91a3b2;--blue:#3b9cff;--green:#48d6a0;--red:#ff6574;--gold:#ffc66d}
 *{box-sizing:border-box}
@@ -45,7 +45,7 @@ p{color:#b5c4ce}.hero p{margin-bottom:0}
 .toast{position:fixed;z-index:80;bottom:88px;left:50%;transform:translateX(-50%);background:#eaf3fa;color:#10202c;padding:11px 17px;border-radius:10px;box-shadow:0 8px 30px #0008;font-weight:700;max-width:calc(100vw - 30px)}
 .bottomnav{position:fixed;z-index:25;bottom:0;left:0;right:0;display:flex;justify-content:center;gap:6px;padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:rgba(8,14,20,.94);backdrop-filter:blur(15px);border-top:1px solid var(--line)}
 .nav-item{border:0;background:transparent;color:#8799a7;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:65px;padding:5px 9px;font-size:11px}.nav-item.active{color:#8fcaff}.nav-icon{font-size:18px}
-@media(max-width:650px){.header-inner{padding:10px 13px;align-items:flex-start}.brand{font-size:14px;padding-top:7px}main{padding:18px 13px 100px}.hero{padding:28px 21px}.stats{grid-template-columns:1fr;gap:8px}.stat{padding:14px 17px}.stat strong{font-size:25px}.profile-card{padding:15px;gap:13px}.account-row{align-items:flex-start;flex-direction:column}.form-grid{grid-template-columns:1fr}.form-row.full{grid-column:auto}.bottomnav{justify-content:space-around}.nav-item{min-width:0;flex:1}.panel{padding:15px}}
+@media(max-width:650px){.header-inner{flex-wrap:wrap}.site-header{position:relative}#authZone{width:100%;justify-content:flex-start}.table-wrap{-webkit-overflow-scrolling:touch;max-width:100%}.header-inner{padding:10px 13px;align-items:flex-start}.brand{font-size:14px;padding-top:7px}main{padding:18px 13px 100px}.hero{padding:28px 21px}.stats{grid-template-columns:1fr;gap:8px}.stat{padding:14px 17px}.stat strong{font-size:25px}.profile-card{padding:15px;gap:13px}.account-row{align-items:flex-start;flex-direction:column}.form-grid{grid-template-columns:1fr}.form-row.full{grid-column:auto}.bottomnav{justify-content:space-around}.nav-item{min-width:0;flex:1}.panel{padding:15px}}
 
 </style>
 </head>
@@ -60,7 +60,6 @@ p{color:#b5c4ce}.hero p{margin-bottom:0}
 <nav id="bottomnav" class="bottomnav" aria-label="Основная навигация"></nav>
 <div id="toastRoot" aria-live="polite"></div>
 <div id="modalRoot"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ============================================================
    НАСТРОЙКА SUPABASE
@@ -69,10 +68,59 @@ const SUPABASE_URL = 'https://rmkpevcckejtpkopokhr.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_6n4DaH1i5cGXS6XWQ2AAtQ_ON63yV59';
 
 let sb = null;
-try {
-  if (typeof supabase === 'undefined') console.error('Supabase JS не загружен');
-  else sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-} catch (e) { console.error('Ошибка Supabase:', e); }
+
+/* Загрузка Supabase без блокировки страницы + резервный CDN */
+function loadSupabaseLibrary(){
+  if (window.supabase?.createClient) return Promise.resolve(window.supabase);
+  const sources = [
+    'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
+    'https://unpkg.com/@supabase/supabase-js@2'
+  ];
+  return new Promise((resolve, reject) => {
+    let index = 0;
+    const tryNext = () => {
+      if (window.supabase?.createClient) return resolve(window.supabase);
+      if (index >= sources.length) return reject(new Error('Не удалось загрузить библиотеку Supabase. Проверьте интернет или блокировку CDN.'));
+      const script = document.createElement('script');
+      script.src = sources[index++];
+      script.async = true;
+      script.crossOrigin = 'anonymous';
+      let settled = false;
+      const timer = setTimeout(() => {
+        if (settled) return;
+        settled = true;
+        script.remove();
+        tryNext();
+      }, 9000);
+      script.onload = () => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        if (window.supabase?.createClient) resolve(window.supabase);
+        else tryNext();
+      };
+      script.onerror = () => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        script.remove();
+        tryNext();
+      };
+      document.head.appendChild(script);
+    };
+    tryNext();
+  });
+}
+
+function initializeSupabase(){
+  if (sb) return sb;
+  if (!window.supabase?.createClient) throw new Error('Библиотека Supabase не загружена');
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+    global: { fetch: (...args) => fetch(...args) }
+  });
+  return sb;
+}
 
 const ROLE_LABELS = {
   panel_admin:  'Админ панели',
@@ -909,14 +957,21 @@ async function deleteAccount(id){
 const REQUIRED_TABLES = ['accounts','staff','info_messages','logs'];
 
 async function checkSchema(){
-  if(!sb)return {ok:false, missing:REQUIRED_TABLES, connection:true};
-  const missing=[];
-  for(const t of REQUIRED_TABLES){
-    const {error}=await sb.from(t).select('*',{count:'exact',head:true});
-    if(error){
-      if(/schema cache|does not exist|not found|could not find the table/i.test(error.message)) missing.push(t);
-      else return {ok:false, missing:[], connection:true, message:error.message};
+  if(!sb)return {ok:false, missing:[], connection:true, message:'Supabase не инициализирован'};
+  const results = await Promise.all(REQUIRED_TABLES.map(async table => {
+    try {
+      const {error} = await sb.from(table).select('*', {count:'exact', head:true});
+      return {table, error};
+    } catch (error) {
+      return {table, error};
     }
+  }));
+  const missing = [];
+  for (const result of results) {
+    if (!result.error) continue;
+    const message = result.error.message || String(result.error);
+    if (/schema cache|does not exist|not found|could not find the table/i.test(message)) missing.push(result.table);
+    else return {ok:false, missing:[], connection:true, message};
   }
   return {ok:missing.length===0, missing};
 }
@@ -939,19 +994,44 @@ function showSchemaErrorScreen(missing){
 }
 
 (async function init(){
+  const app = document.getElementById('app');
   session = loadSession();
-  if(session) await reloadSession();
   renderTopbar();
   renderBottomnav();
-  document.getElementById('app').innerHTML = '<div class="empty">Проверка базы данных…</div>';
-  const schema = await checkSchema();
-  if(!schema.ok){
-    if(schema.connection && !schema.missing.length){
-      document.getElementById('app').innerHTML='<div class="empty"><strong>Не удалось подключиться к базе данных</strong>'+esc(schema.message||'Проверьте URL, ключ Supabase, интернет и настройки доступа (RLS).')+'</div>';
-    } else showSchemaErrorScreen(schema.missing);
-    return;
+  app.innerHTML = '<div class="empty">Подключение к серверу…</div>';
+
+  try {
+    await Promise.race([
+      loadSupabaseLibrary(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Истекло время загрузки библиотеки. Проверьте интернет и отключите блокировщики для сайта.')), 20000))
+    ]);
+    initializeSupabase();
+
+    app.innerHTML = '<div class="empty">Проверка базы данных…</div>';
+    const schema = await Promise.race([
+      checkSchema(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Сервер базы данных не ответил за 20 секунд. Проверьте соединение и попробуйте обновить страницу.')), 20000))
+    ]);
+
+    if(!schema.ok){
+      if(schema.connection && !schema.missing.length){
+        app.innerHTML='<div class="empty"><strong>Не удалось подключиться к базе данных</strong>'+esc(schema.message||'Проверьте URL, ключ Supabase, интернет и настройки доступа (RLS).')+'</div>';
+      } else showSchemaErrorScreen(schema.missing);
+      return;
+    }
+
+    if(session) await Promise.race([
+      reloadSession(),
+      new Promise(resolve => setTimeout(resolve, 8000))
+    ]);
+    renderTopbar();
+    showView('home');
+  } catch(error) {
+    console.error('Ошибка запуска сайта:', error);
+    app.innerHTML = '<div class="empty"><strong>Не удалось загрузить сайт</strong>' +
+      esc(error?.message || 'Проверьте подключение к интернету и обновите страницу.') +
+      '<div style="margin-top:14px"><button class="btn primary" onclick="location.reload()">Повторить</button></div></div>';
   }
-  showView('home');
 })();
 </script>
 </body>
